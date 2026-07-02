@@ -1,0 +1,32 @@
+{
+  "n_cohorts": 50,
+  "cherry_gap_mean": 0.19477999999999998,
+  "cherry_gap_pos": 50,
+  "reg_gap~log10(minority)": {
+    "R2": 0.5860691168062915,
+    "R2_boot95": [
+      0.44415611481786377,
+      0.7202115050067965
+    ],
+    "intercept": 0.5778297484509965,
+    "slope": -0.2222277816049214
+  },
+  "reg_+log10(d)": {
+    "R2": 0.5863837388089059,
+    "b_minority": -0.22458073186666158,
+    "b_dim": 0.004087377203162157
+  },
+  "reg_dim_only_R2": 0.0912384599371392,
+  "partial_dim_slope_after_events": 0.004087377203161893,
+  "mechanism": {
+    "corr_cherrymax_vs_honesthi": 0.9023241204898037,
+    "corr_gap_vs_honest_CI_halfwidth": 0.9153824863190667
+  },
+  "honest_CI_covers_0.5": "36/50",
+  "manufactured_AUC>=0.80_from_noise": "6/50",
+  "min_events_for_expected_gap_below_0.05": 237.2,
+  "ICC_worked_case": {
+    "minority": 57,
+    "cherry_gap": 0.202
+  }
+}

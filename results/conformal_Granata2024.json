@@ -1,0 +1,64 @@
+{
+  "dataset": "Granata2024",
+  "n": 51,
+  "class0": 13,
+  "class1": 38,
+  "minority": 0,
+  "repeats": 300,
+  "levels": {
+    "0.05": {
+      "target": 0.95,
+      "marg_overall": 1.0,
+      "mond_overall": 1.0,
+      "marg_minority": 1.0,
+      "marg_minority_wilson": [
+        0.9957496977346473,
+        1.0
+      ],
+      "mond_minority": 1.0,
+      "mond_minority_wilson": [
+        0.9957496977346473,
+        1.0
+      ],
+      "minority_pooled_n": 900,
+      "selective_coverage": 0.0,
+      "selective_accuracy": null
+    },
+    "0.1": {
+      "target": 0.9,
+      "marg_overall": 0.8948484848484849,
+      "mond_overall": 1.0,
+      "marg_minority": 0.8455555555555555,
+      "marg_minority_wilson": [
+        0.8204815467274503,
+        0.8676921332624947
+      ],
+      "mond_minority": 1.0,
+      "mond_minority_wilson": [
+        0.9957496977346473,
+        1.0
+      ],
+      "minority_pooled_n": 900,
+      "selective_coverage": 0.0,
+      "selective_accuracy": null
+    },
+    "0.2": {
+      "target": 0.8,
+      "marg_overall": 0.8024242424242424,
+      "mond_overall": 0.9172727272727272,
+      "marg_minority": 0.7044444444444444,
+      "marg_minority_wilson": [
+        0.6738151425932535,
+        0.7333358449249133
+      ],
+      "mond_minority": 1.0,
+      "mond_minority_wilson": [
+        0.9957496977346473,
+        1.0
+      ],
+      "minority_pooled_n": 900,
+      "selective_coverage": 0.15181818181818182,
+      "selective_accuracy": 0.4550898203592814
+    }
+  }
+}

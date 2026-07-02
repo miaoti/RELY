@@ -1,0 +1,27 @@
+{
+  "honest": 0.47264102564102567,
+  "permutation_p": 0.5354645354645354,
+  "split_shopping_mean": 0.45769969040247677,
+  "split_shopping_max": 0.6749226006191951,
+  "tuned_mean": 0.5396780185758514,
+  "tuned_max": 0.7182662538699691,
+  "delta": 0.24562522822894345,
+  "protocol": {
+    "grid_k": [
+      7,
+      15,
+      30,
+      50,
+      100
+    ],
+    "grid_C": [
+      0.01,
+      0.1,
+      1.0
+    ],
+    "n_splits": 500,
+    "seeds": "0..499",
+    "feature_selection": "in-fold SelectKBest(f_classif) (no leakage)",
+    "definition": "max over splits x grid (= paper's Delta numerator, pure selection optimism)"
+  }
+}

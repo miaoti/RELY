@@ -1,0 +1,51 @@
+{
+  "B": 50,
+  "n_features": 1004,
+  "families": [
+    "firstorder",
+    "glcm",
+    "gldm",
+    "glrlm",
+    "glszm",
+    "ngtdm",
+    "shape"
+  ],
+  "nogueira_stability": {
+    "sgl(group)": 0.0827167212103892,
+    "flatL1": 0.04328155359171526,
+    "univ_top15": 0.04151676605930554
+  },
+  "family_mean_selfreq_sgl": {
+    "firstorder": 0.028546255506607932,
+    "glcm": 0.03523012552301255,
+    "gldm": 0.02130952380952381,
+    "glrlm": 0.025095541401273888,
+    "glszm": 0.0887116564417178,
+    "ngtdm": 0.25000000000000006,
+    "shape": 0.37142857142857144
+  },
+  "n_selected_freq_ge_0.5": {
+    "sgl(group)": 1,
+    "flatL1": 0,
+    "univ_top15": 0
+  },
+  "nested_sgl_honest_auc": 0.5176730769230768,
+  "nested_sgl_auc_ci": [
+    0.23197115384615385,
+    0.8119230769230769
+  ],
+  "nested_sgl_mean_n_selected": 18.16,
+  "top10_features_sgl": [
+    "shape_LeastAxisLength_T2",
+    "shape_LeastAxisLength_DWI",
+    "shape_MinorAxisLength_T2",
+    "shape_MinorAxisLength_DWI",
+    "ngtdm_Complexity_DWI.8",
+    "ngtdm_Complexity_DWI.1",
+    "shape_VoxelVolume_DWI",
+    "shape_Flatness_T2",
+    "ngtdm_Complexity_DWI",
+    "shape_MeshVolume_DWI"
+  ],
+  "runtime_sec": 118.6
+}

@@ -1,0 +1,44 @@
+{
+  "paired_auc": {
+    "auc_main": 0.4705,
+    "auc_age_volume": 0.5883,
+    "mean_diff": -0.1178,
+    "nb_se": 0.0551,
+    "t": -2.138,
+    "pvalue": 0.035,
+    "n_folds": 100
+  },
+  "dca": {
+    "prevalence": 0.3115,
+    "max_nb_main": 0.2752,
+    "max_nb_age_volume": 0.2752,
+    "note": "model net benefit ~ treat-none / below age+volume -> no clinical utility"
+  },
+  "subgroup_main_oof_auc": {
+    "Sex=0": {
+      "n": 62,
+      "auc": 0.527
+    },
+    "Sex=1": {
+      "n": 121,
+      "auc": 0.509
+    },
+    "Age_low": {
+      "n": 66,
+      "auc": 0.403
+    },
+    "Age_mid": {
+      "n": 56,
+      "auc": 0.623
+    },
+    "Age_high": {
+      "n": 61,
+      "auc": 0.52
+    }
+  },
+  "hosmer_lemeshow_main": {
+    "HL_stat": 8.496,
+    "df": 8,
+    "pvalue": 0.3866
+  }
+}

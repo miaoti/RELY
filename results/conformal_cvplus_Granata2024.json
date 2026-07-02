@@ -1,0 +1,28 @@
+{
+  "dataset": "Granata2024",
+  "method": "cvplus",
+  "minority": 0,
+  "levels": {
+    "0.05": {
+      "target": 0.95,
+      "marg_overall": 0.9722727272727273,
+      "mond_overall": 0.9886363636363636,
+      "marg_minority": 0.975,
+      "mond_minority": 1.0
+    },
+    "0.1": {
+      "target": 0.9,
+      "marg_overall": 0.9309090909090909,
+      "mond_overall": 0.9386363636363636,
+      "marg_minority": 0.9,
+      "mond_minority": 0.9616666666666667
+    },
+    "0.2": {
+      "target": 0.8,
+      "marg_overall": 0.8436363636363636,
+      "mond_overall": 0.8581818181818182,
+      "marg_minority": 0.7333333333333333,
+      "mond_minority": 0.8716666666666667
+    }
+  }
+}

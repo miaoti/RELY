@@ -1,0 +1,54 @@
+{
+  "n_cohorts": 50,
+  "B": 750,
+  "kappa": 3.639,
+  "score": "risk = sqrt(2 ln B) * Hanley-McNeil SE(AUC=0.5, n_pos, n_neg)  [pre-data, class counts only]",
+  "caveat": "ROC-AUC is monotone-invariant to kappa; the 'chance-coverage' label is partly confirmatory-by-construction (CI-covers-0.5 is SE-driven). Load-bearing: it holds across 50 real pipelines and contrasts with dimensionality (R^2=0.09).",
+  "decision_use": "high-NPV side identifies the minority of cohorts that CAN be reliably evaluated; flag the rest as 'unlikely to be reliably evaluable' pre-data.",
+  "results": {
+    "chance (honest CI covers 0.5)": {
+      "positives": 36,
+      "base_rate": 0.72,
+      "roc_auc": 0.831,
+      "loso_mean": 0.832,
+      "loso_range": [
+        0.818,
+        0.855
+      ],
+      "operating_point_Youden_insample": {
+        "threshold_risk": 0.3681,
+        "sensitivity": 0.583,
+        "specificity": 1.0,
+        "PPV": 1.0,
+        "NPV": 0.483
+      },
+      "operating_point_LOSO_outofsample": {
+        "sensitivity": 0.556,
+        "specificity": 0.857,
+        "n_evaluated": 50
+      }
+    },
+    "fabricate (cherry>=0.80 & honest<0.65)": {
+      "positives": 9,
+      "base_rate": 0.18,
+      "roc_auc": 0.637,
+      "loso_mean": 0.637,
+      "loso_range": [
+        0.595,
+        0.701
+      ],
+      "operating_point_Youden_insample": {
+        "threshold_risk": 0.4143,
+        "sensitivity": 0.667,
+        "specificity": 0.707,
+        "PPV": 0.333,
+        "NPV": 0.906
+      },
+      "operating_point_LOSO_outofsample": {
+        "sensitivity": 0.556,
+        "specificity": 0.659,
+        "n_evaluated": 50
+      }
+    }
+  }
+}

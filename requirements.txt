@@ -1,0 +1,12 @@
+# 主环境（评测/审计）—— Python 3.12.10
+numpy==2.4.4
+pandas==3.0.2
+scikit-learn==1.8.0
+scipy==1.17.1
+matplotlib==3.10.9
+radMLBench==1.1          # 第二队列：50 个真实影像组学特征表（特征+二分类标签）
+asgl                     # 阶段5 sparse-group LASSO（稳定性选择 C3；依赖 cvxpy）
+
+# 注意：PyRadiomics 不在此列——它不兼容 numpy>=2 / py3.12，需单独副环境，
+#       仅在做 ISLES'24 原始影像提取时才需要（见 docs/ISLES24_获取与提取.md）：
+#       conda create -n radiomics python=3.10 -y && pip install "numpy<2" SimpleITK pyradiomics nibabel pandas

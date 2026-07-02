@@ -1,0 +1,34 @@
+{
+  "n_cohorts": 50,
+  "n_sources": 39,
+  "R2_observed_gap_vs": {
+    "hanley_mcneil_SE (closed-form 1-param)": 0.727,
+    "free multivariate {log n_pos, log n_neg, AUC} (3-param)": 0.813,
+    "log10(minority_events)": 0.586,
+    "log10(n)": 0.592,
+    "log10(dimensionality)": 0.091
+  },
+  "robustness_R2": {
+    "leave_one_source_out": [
+      0.71,
+      0.792
+    ],
+    "cluster_bootstrap_95CI": [
+      0.572,
+      0.862
+    ],
+    "fixed_working_point_a0.5 (no shared honest-AUC)": 0.654,
+    "fixed_working_point_a0.7": 0.642
+  },
+  "kappa_fitted": 2.306,
+  "kappa_theoretical_B750": 3.639,
+  "effective_independent_selections_B_eff": 14.3,
+  "residual_sd": 0.053,
+  "caveat": "gap≈kappa*SE is partly confirmatory-by-construction (extreme-value); the load-bearing results are that it holds across 50 real pipelines and the contrast with dimensionality (R²≈0.09).",
+  "scope": "predicts the split-max (selection) component of optimism; not the feature-leakage component.",
+  "calculator (uses FITTED kappa=2.31, planning-level not per-study)": {
+    "min_minority_events_for_expected_gap<=0.05 (prev=0.3,AUC=0.5)": 847,
+    "min_minority_events_for_expected_gap<=0.10": 214,
+    "prediction_interval_note": "±0.10 AUC residual (95%); population-level planning heuristic"
+  }
+}

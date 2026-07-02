@@ -1,0 +1,64 @@
+{
+  "dataset": "ICC",
+  "n": 183,
+  "class0": 126,
+  "class1": 57,
+  "minority": 1,
+  "repeats": 300,
+  "levels": {
+    "0.05": {
+      "target": 0.95,
+      "marg_overall": 0.974954954954955,
+      "mond_overall": 0.9743243243243244,
+      "marg_minority": 0.9880986937590711,
+      "marg_minority_wilson": [
+        0.9838951651309044,
+        0.9912148544188482
+      ],
+      "mond_minority": 1.0,
+      "mond_minority_wilson": [
+        0.9988861187478136,
+        0.9999999999999998
+      ],
+      "minority_pooled_n": 3445,
+      "selective_coverage": 0.03846846846846847,
+      "selective_accuracy": 0.3325526932084309
+    },
+    "0.1": {
+      "target": 0.9,
+      "marg_overall": 0.9212612612612613,
+      "mond_overall": 0.9210810810810811,
+      "marg_minority": 0.9306240928882439,
+      "marg_minority_wilson": [
+        0.921650579768489,
+        0.9386382778003829
+      ],
+      "mond_minority": 0.9184325108853411,
+      "mond_minority_wilson": [
+        0.9088196899060446,
+        0.9271131636062767
+      ],
+      "minority_pooled_n": 3445,
+      "selective_coverage": 0.16054054054054054,
+      "selective_accuracy": 0.5084175084175084
+    },
+    "0.2": {
+      "target": 0.8,
+      "marg_overall": 0.8142342342342342,
+      "mond_overall": 0.8159459459459459,
+      "marg_minority": 0.7375907111756168,
+      "marg_minority_wilson": [
+        0.7226406119212633,
+        0.752011514752226
+      ],
+      "mond_minority": 0.8362844702467344,
+      "mond_minority_wilson": [
+        0.8235549363476267,
+        0.8482648422122235
+      ],
+      "minority_pooled_n": 3445,
+      "selective_coverage": 0.3545045045045045,
+      "selective_accuracy": 0.48081321473951716
+    }
+  }
+}
