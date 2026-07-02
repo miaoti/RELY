@@ -86,9 +86,9 @@ def main():
     # ---------- insight band (bottom) ----------
     ax.add_patch(FancyBboxPatch((0.02, 0.015), 0.96, 0.285,
                  boxstyle="round,pad=0.004,rounding_size=0.02", fc=BAND, ec="0.75", lw=0.9, zorder=1))
-    ax.text(0.50, 0.262, "the gap is sampling variance, predictable pre-data,", ha="center", va="center",
+    ax.text(0.50, 0.262, "the gap is sampling variance, set by class counts,", ha="center", va="center",
             fontsize=7.7, fontweight="bold")
-    ax.text(0.50, 0.216, "set by class counts, not dimensionality:", ha="center", va="center",
+    ax.text(0.50, 0.216, "not dimensionality; predictable pre-modeling:", ha="center", va="center",
             fontsize=7.7, fontweight="bold")
     ax.text(0.50, 0.156, r"$\Delta \;\approx\; \kappa\,\cdot\,\mathrm{SE}_{\mathrm{AUC}}(n_+, n_-)$",
             ha="center", va="center", fontsize=10)

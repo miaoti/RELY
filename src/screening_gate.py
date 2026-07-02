@@ -75,7 +75,7 @@ def main():
             ((d["test_selected_max"] >= 0.80) & (d["honest_auc"] < 0.65)).astype(int).values,
     }
     legname = {"chance (honest CI covers 0.5)": "unreliable: honest 95% CI covers 0.5",
-               "fabricate (cherry>=0.80 & honest<0.65)": "fabrication-prone (harder label)"}
+               "fabricate (cherry>=0.80 & honest<0.65)": "high-optimism (harder label)"}
     legstyle = {"chance (honest CI covers 0.5)": dict(color=figstyle.GREEN, lw=2.6, zorder=5),
                 "fabricate (cherry>=0.80 & honest<0.65)": dict(color="#9a9a9a", lw=1.0, alpha=0.85, zorder=2)}
     out = {"n_cohorts": int(len(d)), "B": B, "kappa": round(kappa, 3),
@@ -116,7 +116,7 @@ def main():
             "operating_point_LOSO_outofsample": loso_operating_point(risk, lab, src)}
     ax.plot([0, 1], [0, 1], ls=":", color="0.5", lw=1, label="chance")
     ax.set_xlabel("false positive rate"); ax.set_ylabel("true positive rate")
-    ax.set_title("Pre-data evaluability screening gate\n(class counts only, pre-modeling; $n$=50 cohorts)")
+    ax.set_title("Pre-modeling evaluability screening gate\n(class counts only; $n$=50 cohorts)")
     ax.legend(loc="lower right", framealpha=1.0, fontsize=5.9, borderaxespad=0.25,
               handlelength=1.2, labelspacing=0.3); ax.set_xlim(-0.02, 1.02); ax.set_ylim(-0.02, 1.02)
     fig.tight_layout(); FIGS.mkdir(exist_ok=True)
