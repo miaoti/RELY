@@ -1,4 +1,4 @@
-# Pre-registration template — small-sample radiomics evaluation
+# Pre-registration template for small-sample radiomics evaluation
 
 A fill-in protocol to **freeze the evaluation before you see results**: the primary model, primary metric, feature-selection rule, optimism-gap definition, and statistics. Pre-registration is the strongest guard against the selection optimism this toolkit quantifies. It aligns with the open-science / pre-registration items of **TRIPOD+AI** (Collins et al., *BMJ* 2024;385:e078378) and the risk-of-bias domains of **PROBAST** (Moons et al., *Ann Intern Med* 2019;170:W1–W33), whose dominant controllable domain in small-sample radiomics is **Analysis**.
 
@@ -10,10 +10,10 @@ A fill-in protocol to **freeze the evaluation before you see results**: the prim
 - Outcome: `<define>`; positive class = `<define>`. State the class counts `n₊` (events) and `n₋`.
 - If the label's provenance is uncertain, state it here and treat it as a limitation (it can only bias the honest estimate toward chance, not manufacture signal).
 
-## 2. Single primary model (confirmatory) — one, fixed in advance
+## 2. Single primary model (confirmatory): one, fixed in advance
 Leakage-free pipeline; every `fit` happens inside the inner **training** folds only:
 `Impute(median) → VarianceThreshold → StandardScaler → SelectKBest(f_classif, k) → L2-LogisticRegression(class_weight="balanced")`
-- Inner k-fold tuning grid: `k ∈ {…}`, `C ∈ {…}` — pre-specify the exact values.
+- Inner k-fold tuning grid: `k ∈ {…}`, `C ∈ {…}`; pre-specify the exact values.
 - Imbalance: `class_weight="balanced"`; avoid resampling (e.g. SMOTE) that distorts calibration.
 - Any other learner / feature count / modality subset is **secondary/exploratory**.
 
@@ -29,17 +29,17 @@ Brier, ECE / calibration, sensitivity–specificity, and class-conditional confo
 - In-fold only (`SelectKBest` inside each training fold); compute any selection-frequency/stability statistics on training folds. **Never inspect the outer test fold.**
 
 ## 6. Optimism-gap definition (pre-specify)
-Same data, same feature pool, same model family — vary **only the evaluation protocol**:
+Same data, same feature pool, same model family; vary **only the evaluation protocol**:
 - **Honest** = nested-CV AUC (the primary metric above).
 - **Optimistic** = the maximum over many random train/test splits crossed with the tuning grid, with model/threshold chosen on the test set (a deliberate bad-practice arm, labeled as such).
 - **Reported optimism `Δ = max selected test-AUC − honest AUC`.**
 
 ## 7. Statistical tests
-- Primary model vs a parsimonious clinical baseline: paired test on **per-fold AUC differences** (Nadeau–Bengio corrected) — **not** DeLong on pooled-CV predictions.
+- Primary model vs a parsimonious clinical baseline: paired test on **per-fold AUC differences** (Nadeau–Bengio corrected), **not** DeLong on pooled-CV predictions.
 - Label-permutation null ≥ 1000 draws, **re-running the entire pipeline (including feature selection) on each draw**; report the p-value.
 - Coverage / proportion estimates: binomial (Wilson) confidence intervals.
 
-## 8. Pre-data evaluability (decide before modeling)
+## 8. Pre-modeling evaluability (decide before modeling)
 Before any modeling, run the RELY **gate** and **calculator** on the class counts alone:
 - The gate flags whether the cohort can be evaluated honestly at all (whether the honest CI is expected to cover chance).
 - The calculator returns the minority-event target needed to bound the expected reported optimism at your tolerance `δ`.
@@ -53,4 +53,4 @@ Fixed master seed (derive child seeds); environment pinned in `requirements.txt`
 
 ---
 
-*Scope note.* This is a methodology / study-planning template, not a clinical tool. Participant, predictor, and outcome (PROBAST) domains should be reported honestly; where data provenance is limited, state it as a limitation. The template targets the **Analysis** domain — data leakage and optimistic evaluation selection — which is the bias this toolkit measures and corrects.
+*Scope note.* This is a methodology / study-planning template, not a clinical tool. Participant, predictor, and outcome (PROBAST) domains should be reported honestly; where data provenance is limited, state it as a limitation. The template targets the **Analysis** domain (data leakage and optimistic evaluation selection), which is the bias this toolkit measures and corrects.

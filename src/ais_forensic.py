@@ -159,7 +159,7 @@ def main():
     ax.set_xlabel("ROC-AUC   (AIS cohort, $n$=183, 57 events)")
     ax.spines["left"].set_visible(False)
     ax.grid(False); ax.grid(axis="x", alpha=0.18, zorder=0)
-    ax.set_title("One real cohort: honest evaluation is at chance —\nsplit-shopping and test-set "
+    ax.set_title("One real cohort: honest evaluation is at chance;\nsplit-shopping and test-set "
                  "tuning climb it to a publishable-looking %.2f" % top, fontsize=8.5, pad=6, linespacing=1.15)
     fig.tight_layout()
     fig.savefig(FIGS / "AIS_forensic.png")

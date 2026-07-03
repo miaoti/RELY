@@ -1,0 +1,30 @@
+{
+  "RF": {
+    "tag": "RF (no preselection)",
+    "n_cohorts": 50,
+    "mean_gap": 0.127,
+    "R2_SE_working_point": 0.695,
+    "R2_SE_a0.5_no_shared_term": 0.55,
+    "R2_log_dimensionality": 0.08,
+    "R2_two_counts": 0.535,
+    "R2_two_counts_plus_logd": 0.536,
+    "incremental_R2_from_dimensionality": 0.001,
+    "kappa_fitted": 1.381,
+    "residual_sd": 0.035
+  },
+  "LR": {
+    "tag": "l2-LR (paper)",
+    "n_cohorts": 50,
+    "mean_gap": 0.195,
+    "R2_SE_working_point": 0.727,
+    "R2_SE_a0.5_no_shared_term": 0.654,
+    "R2_log_dimensionality": 0.091,
+    "R2_two_counts": 0.625,
+    "R2_two_counts_plus_logd": 0.627,
+    "incremental_R2_from_dimensionality": 0.002,
+    "kappa_fitted": 2.306,
+    "residual_sd": 0.053
+  },
+  "gap_rf_vs_gap_lr_pearson_r": 0.618,
+  "n_matched_cohorts": 50
+}
