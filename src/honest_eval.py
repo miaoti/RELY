@@ -99,24 +99,63 @@ def make_pipeline():
 PARAM_GRID = {"select__k": [10, 20, 30], "clf__C": [0.01, 0.1, 1.0]}
 
 
-def honest_nested_cv(X, y, repeats, seed, n_jobs=-1, grid=None):
+def _pooled_oof_ci(oof, y, n_boot=2000, seed=20260625):
+    """诚实 AUC 的【患者级 bootstrap 置信区间】。
+
+    输入 oof 是逐 repeat 的交叉拟合 out-of-fold 预测矩阵（repeats × n），每个样本在每个
+    repeat 中恰好被预测一次 → 每个 repeat 可池化成一个 pooled AUC。区间由【重抽患者】
+    （而非重抽折）得到，因此是"总体 AUC 的置信区间"，而不是折间波动的分位数。
+    折分数的 2.5–97.5 百分位【不是】置信区间：折之间相关、且每折测试集很小。"""
+    y = np.asarray(y)
+    per_repeat = [roc_auc_score(y, p) for p in oof]
+    if n_boot <= 0:                      # 置换检验等场景只要点估计，跳过 bootstrap
+        return {"pooled_auc": float(np.mean(per_repeat)),
+                "pooled_auc_sd_across_repeats": float(np.std(per_repeat, ddof=1)) if len(per_repeat) > 1 else 0.0,
+                "boot_ci_lo": float("nan"), "boot_ci_hi": float("nan"), "boot_n": 0}
+    rng = np.random.default_rng(seed)
+    n = len(y); boot = []
+    for _ in range(n_boot):
+        idx = rng.integers(0, n, n)
+        if len(np.unique(y[idx])) < 2:
+            continue
+        boot.append(float(np.mean([roc_auc_score(y[idx], p[idx]) for p in oof])))
+    boot = np.asarray(boot)
+    return {
+        "pooled_auc": float(np.mean(per_repeat)),
+        "pooled_auc_sd_across_repeats": float(np.std(per_repeat, ddof=1)) if len(per_repeat) > 1 else 0.0,
+        "boot_ci_lo": float(np.percentile(boot, 2.5)),
+        "boot_ci_hi": float(np.percentile(boot, 97.5)),
+        "boot_n": int(boot.size),
+    }
+
+
+def honest_nested_cv(X, y, repeats, seed, n_jobs=-1, grid=None, boot=2000):
     """重复分层嵌套 CV：外层评估，内层(5折)选 k + 调 C。逐外层折算 AUC。
-    grid 可覆盖默认 PARAM_GRID（基线子集特征少时用，避免 k 超过特征数）。"""
+    grid 可覆盖默认 PARAM_GRID（基线子集特征少时用，避免 k 超过特征数）。
+
+    区间口径（v2）：主口径 = 逐 repeat 池化 out-of-fold 预测 + 【患者级 bootstrap】的
+    pooled AUC 置信区间（`ci_lo/ci_hi`）；并给 Nadeau-Bengio 校正区间作对照。
+    `p2.5/p97.5` 仍保留，但那是【折分数的离散度】，不得当作置信区间使用。"""
     grid = grid if grid is not None else PARAM_GRID
     outer = RepeatedStratifiedKFold(n_splits=10, n_repeats=repeats, random_state=seed)
     aucs, briers, eces, senss, specs = [], [], [], [], []
+    oof = np.full((repeats, len(y)), np.nan)          # 逐 repeat 的交叉拟合 OOF 预测
     for i, (tr, te) in enumerate(outer.split(X, y)):
         inner = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed + i)
         gs = GridSearchCV(make_pipeline(), grid, scoring="roc_auc",
                           cv=inner, n_jobs=n_jobs, refit=True)
         gs.fit(X[tr], y[tr])
         proba = gs.predict_proba(X[te])[:, 1]
+        oof[i // 10, te] = proba
         aucs.append(roc_auc_score(y[te], proba))
         b, e = _calib_metrics(y[te], proba); briers.append(b); eces.append(e)
         s, sp = _sens_spec(y[te], proba); senss.append(s); specs.append(sp)
     out = _stats(aucs)
     # Nadeau & Bengio (2003) 校正方差：10 折 → n_test/n_train = (1/10)/(9/10) = 1/9
     out["auc_nb_se"] = float(np.sqrt((1.0 / out["n"] + 1.0 / 9.0) * np.var(aucs, ddof=1)))
+    out["nb_lo"] = float(out["mean"] - 1.96 * out["auc_nb_se"])
+    out["nb_hi"] = float(out["mean"] + 1.96 * out["auc_nb_se"])
+    out.update(_pooled_oof_ci(oof, y, n_boot=boot, seed=seed))
     out["brier"] = float(np.nanmean(briers)); out["ece"] = float(np.nanmean(eces))
     out["sensitivity"] = float(np.nanmean(senss)); out["specificity"] = float(np.nanmean(specs))
     return out
@@ -160,6 +199,7 @@ def test_tuned_single_splits(X, y, n_splits=300, base_seed=0):
     特征选择在训练折内做（无选择泄漏），孤立出"在测试集上选模型"这一项乐观来源。"""
     cands = [(k, C) for k in (7, 15, 30, 50, 100) for C in (0.01, 0.1, 1.0)]
     best = []
+    every = []          # 全部 n_splits x |grid| 次评测，用于拆分两级选择
     for s in range(n_splits):
         Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.30, stratify=y,
                                               random_state=base_seed + s)
@@ -175,8 +215,19 @@ def test_tuned_single_splits(X, y, n_splits=300, base_seed=0):
             ]).fit(Xtr, ytr)
             auc = roc_auc_score(yte, pipe.predict_proba(Xte)[:, 1])
             best_auc = max(best_auc, auc)          # 在 TEST 上选最好 -> 乐观
+            every.append(auc)
         best.append(best_auc)
-    return _stats(best)
+    out = _stats(best)                 # 逐划分最优值的分布（B = n_splits）
+    e = np.asarray(every, float)
+    # 两级选择的拆分（round-23）：
+    #   grand_mean = 全部 n_splits x |grid| 次评测的均值（谁都没挑过）
+    #   out["mean"] = 逐划分先在 test 上挑网格最优后的均值 -> 已含"每划分内调参"那一级
+    #   out["max"]  = 再跨划分挑最好 -> 两级都挑
+    out["grand_mean"] = float(e.mean())
+    out["grand_sd"] = float(e.std(ddof=1))
+    out["n_candidates_total"] = int(e.size)
+    out["n_splits"] = int(n_splits)
+    return out
 
 
 def main():

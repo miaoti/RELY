@@ -56,9 +56,9 @@ def main():
     L.append(f"- **Hosmer-Lemeshow**：p={stats['hosmer_lemeshow_main']['pvalue']}（校准拟合无异常）。")
     L.append(f"- **C3 稳定性（附注，降权）**：sgl(分组) {stab['nogueira_stability']['sgl(group)']:.3f} > "
              f"flatL1 {stab['nogueira_stability']['flatL1']:.3f}，但**两者绝对值均≈0（噪声级，该队列无信号）**，仅作方法学附注、不当卖点。")
-    rp = jload("reliability_predictor.json"); r2s = rp["R2_observed_gap_vs"]; rob = rp["robustness_R2"]
+    rp = jload("reliability_predictor.json"); r2s = rp["R2_Delta_split_vs"]; rob = rp["robustness_R2"]
     sg = jload("screening_gate.json")
-    r2_se = r2s["hanley_mcneil_SE (closed-form 1-param)"]
+    r2_se = r2s["hanley_mcneil_SE (one predictor + intercept)"]
     r2_mv = r2s["free multivariate {log n_pos, log n_neg, AUC} (3-param)"]
     chance = sg["results"]["chance (honest CI covers 0.5)"]
     L.append(f"- **★ C1 可靠性预测器（头条，N={rp['n_cohorts']} 队列 / {rp['n_sources']} 源）**：报告型乐观(cherry-pick) 由"

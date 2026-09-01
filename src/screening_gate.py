@@ -1,12 +1,21 @@
 """
 事前筛查闸门（decision-utility · 把"描述性预测"升级成"有实测性能的工具"）。
-仅用【投稿前就知道的量】(n_pos, n_neg, 选择预算 B)——不跑任何模型——给每个队列一个"可伪造风险分"：
+仅用【投稿前就知道的量】(n_pos, n_neg, 选择预算 B)——不跑任何模型——给每个队列一个风险分：
     risk = κ·SE_HM(AUC=0.5, n_pos, n_neg),  κ=√(2 ln B)
-即"在 chance 基线上，split-shopping 期望能把 AUC 抬高多少"。
-然后用 50 队列的【实际结局】当标签，评这个事前分作为分类器的性能（ROC-AUC，含 LOSO）：
-  L_fabricate : 实际 test_selected_max ≥ 0.80 且 honest_auc < 0.65（看着可发表、实则不可靠）。
-  L_chance    : honest 95%CI 盖 0.5（诚实下与随机不可区分）。
-讯息：仅凭类别计数、在建模之前，闸门就能以 ROC-AUC≈0.9x 标出"能伪造可发表 AUC"的队列。
+即"在 chance 工作点上，split-shopping 期望能把 AUC 抬高多少"。ROC-AUC 对 κ 这个单调因子不变，
+故 B 的取值不影响闸门性能。
+
+── round-18 标签修订（回应外部审稿）────────────────────────────────────────────
+主标签改为【可直接测量的决策量】：Δ_selection ≥ δ（δ=0.15），即"光靠在多个评测里挑最好的，
+报告 AUC 就会被抬高至少 δ"。
+
+为什么换掉旧的 "honest 95%CI 覆盖 0.5"：
+  ① 旧的 honest_lo/hi 是【逐折 AUC 的 2.5–97.5 百分位】，折之间相关、每折测试集很小，
+     那是折间波动的离散度，不是置信区间——在多个队列上它宽到 [0.000, 1.000]。
+  ② 更根本地：大样本真无信号的数据会精确估出 AUC≈0.5 并正确覆盖 0.5，那是【评测成功】，
+     不是"不可评测"。用覆盖 0.5 当"不可靠"的标签，逻辑上就把成功当成了失败。
+现在 honest CI 用的是患者级 bootstrap（见 honest_eval._pooled_oof_ci），仍作次要标签报告，
+但主标签是 Δ_selection ≥ δ。
 输出 results/screening_gate.json，图 figures/screening_gate_roc.png(.pdf)。
 """
 from __future__ import annotations
@@ -22,7 +31,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS, FIGS = ROOT / "results", ROOT / "figures"
-B = 750
+B = 50            # 与主协议同一个选择预算（round-25：原来是无关的 750）
 
 
 def hm_se(auc, p, n):
@@ -31,15 +40,36 @@ def hm_se(auc, p, n):
     return math.sqrt(max((auc * (1 - auc) + (p - 1) * (q1 - auc ** 2) + (n - 1) * (q2 - auc ** 2)) / (p * n), 1e-12))
 
 
-def loso_auc(score, label, src):
-    """leave-one-source-out 池化预测的 ROC-AUC（每次留一个源做'测试'，分数本就无需训练→等于整体，
-    但报告 drop-one-source 的稳健区间）。"""
+def delete_one_auc(score, label, src):
+    """delete-one **sensitivity** range: drop one source and re-score the REMAINING cohorts.
+
+    round-23: this used to be reported as "leave-one-source-out AUC", which it is not.
+    It measures how much one source influences the in-sample AUC, not held-out performance.
+    The genuinely out-of-sample quantity is `heldout_source_auc` below (and the LOSO
+    operating point, which was already out-of-sample)."""
     aucs = []
-    for s in np.unique(src):
-        m = src != s
+    for s_ in np.unique(src):
+        m = src != s_
         if len(np.unique(label[m])) == 2:
             aucs.append(roc_auc_score(label[m], score[m]))
     return float(np.mean(aucs)), float(np.min(aucs)), float(np.max(aucs))
+
+
+def heldout_source_auc(score, label, src):
+    """真·留出来源 AUC：把每个 source 的队列留出，只在【留出的那些队列】上算 AUC，
+    再对能算的 source 取平均。因为风险分不需要拟合，这衡量的是"分数在没见过的来源上
+    还能不能排序"，而不是删掉一个来源后剩下的数据有多好排。
+    只有同时含正负标签的 source 才可评（其余记为不可评，如实报告）。"""
+    aucs, n_eval, n_skip = [], 0, 0
+    for s_ in np.unique(src):
+        te = src == s_
+        if te.sum() >= 2 and len(np.unique(label[te])) == 2:
+            aucs.append(roc_auc_score(label[te], score[te])); n_eval += 1
+        else:
+            n_skip += 1
+    if not aucs:
+        return float("nan"), 0, n_skip
+    return float(np.mean(aucs)), n_eval, n_skip
 
 
 def loso_operating_point(score, label, src):
@@ -61,30 +91,41 @@ def loso_operating_point(score, label, src):
 def main():
     import re
     d = pd.read_csv(RESULTS / "radmlbench_sweep.csv")
-    tpos = np.maximum(1, np.round(0.30 * d["minority"]).astype(int)).values
-    tneg = np.maximum(1, np.round(0.30 * (d["n"] - d["minority"])).astype(int)).values
+    # round-25：精确的分层留出计数 + 正类方向取 Target==1（JSON 一直这么声明，代码却还在
+    # 用 minority 和 round(0.3n)）。Hanley--McNeil 对两个计数不对称，口径必须和预测器一致。
+    from cohort_counts import counts_table
+    ct = counts_table([str(x) for x in d["dataset"]]).set_index("dataset")
+    tpos = np.array([int(ct.loc[str(x), "te_pos"]) for x in d["dataset"]])
+    tneg = np.array([int(ct.loc[str(x), "te_neg"]) for x in d["dataset"]])
     kappa = math.sqrt(2 * math.log(B))
     risk = np.array([kappa * hm_se(0.5, p, n) for p, n in zip(tpos, tneg)])  # 事前风险分（仅类别计数）
     src = np.array([re.split(r'[-_]', x)[0] for x in d["dataset"]])
     src = np.array([re.sub(r'\d+.*$', '', s) or s for s in src])
 
-    labels = {  # chance(evaluability) 是头条、先画；fabricate 较弱、次要
-        "chance (honest CI covers 0.5)":
-            ((d["honest_lo"] <= 0.5) & (d["honest_hi"] >= 0.5)).astype(int).values,
-        "fabricate (cherry>=0.80 & honest<0.65)":
-            ((d["test_selected_max"] >= 0.80) & (d["honest_auc"] < 0.65)).astype(int).values,
+    DELTA = 0.15
+    labels = {  # 主标签 = 可直接测量的选择膨胀量；次要标签保留作更难的对照
+        "selection inflation (Delta_selection >= %.2f)" % DELTA:
+            (d["delta_selection"] >= DELTA).astype(int).values,
+        "fabricate (max>=0.80 & honest<0.65)":
+            ((d["test_selected_max"] >= 0.80) & (d["honest_pooled_auc"] < 0.65)).astype(int).values,
     }
-    legname = {"chance (honest CI covers 0.5)": "unreliable: honest 95% CI covers 0.5",
-               "fabricate (cherry>=0.80 & honest<0.65)": "high-optimism (harder label)"}
-    legstyle = {"chance (honest CI covers 0.5)": dict(color=figstyle.GREEN, lw=2.6, zorder=5),
-                "fabricate (cherry>=0.80 & honest<0.65)": dict(color="#9a9a9a", lw=1.0, alpha=0.85, zorder=2)}
+    legname = {"selection inflation (Delta_selection >= %.2f)" % DELTA:
+                   r"selection optimism $\Delta\geq%.2f$" % DELTA,
+               "fabricate (max>=0.80 & honest<0.65)": "high-optimism (harder label)"}
+    legstyle = {"selection inflation (Delta_selection >= %.2f)" % DELTA:
+                    dict(color=figstyle.GREEN, lw=2.6, zorder=5),
+                "fabricate (max>=0.80 & honest<0.65)":
+                    dict(color="#9a9a9a", lw=1.0, alpha=0.85, zorder=2)}
     out = {"n_cohorts": int(len(d)), "B": B, "kappa": round(kappa, 3),
-           "score": "risk = sqrt(2 ln B) * Hanley-McNeil SE(AUC=0.5, n_pos, n_neg)  [pre-data, class counts only]",
-           "caveat": "ROC-AUC is monotone-invariant to kappa; the 'chance-coverage' label is partly "
-                     "confirmatory-by-construction (CI-covers-0.5 is SE-driven). Load-bearing: it holds across "
-                     "50 real pipelines and contrasts with dimensionality (R^2=0.09).",
-           "decision_use": "high-NPV side identifies the minority of cohorts that CAN be reliably evaluated; "
-                           "flag the rest as 'unlikely to be reliably evaluable' pre-data.",
+           "score": "risk = c * Hanley-McNeil SE(AUC=0.5, exact stratified held-out class counts from cohort_counts.exact_test_counts, n_pos = the class roc_auc_score treats as positive). ROC-AUC is invariant to the positive constant c, so this is a RANK score, not a calibrated expected optimism; the calculator (which does need a calibrated value) uses the fitted kappa instead.",
+           "label_primary": "Delta_selection >= %.2f (measured: max_b - mean_b over the same splits x grid)" % DELTA,
+           "caveat": "ROC-AUC is monotone-invariant to kappa. Score and label are both driven by the same "
+                     "sampling variance, so the gate CALIBRATES the closed form rather than validating it "
+                     "independently; what makes it usable is that the score is available before any modeling "
+                     "while the label is not. Load-bearing: it holds across 50 real pipelines and contrasts "
+                     "with dimensionality.",
+           "decision_use": "a flag means split-shopping can inflate this cohort's reported AUC by >= delta; "
+                           "treat any single favourable split as unverifiable and quote the calculator target.",
            "results": {}}
     figstyle.apply()
     fig, ax = plt.subplots(figsize=(figstyle.COL, figstyle.COL * 0.98))
@@ -94,7 +135,7 @@ def main():
             out["results"][name] = {"positives": pos, "note": "degenerate"}
             continue
         auc = roc_auc_score(lab, risk)
-        m, lo, hi = loso_auc(risk, lab, src)
+        m, lo, hi = delete_one_auc(risk, lab, src)
         fpr, tpr, thr = roc_curve(lab, risk)
         j = int(np.argmax(tpr - fpr))                      # Youden 最优操作点
         tau = float(thr[j]); pred = (risk >= tau).astype(int)
@@ -108,9 +149,15 @@ def main():
             ax.annotate(f"operating point (in-sample)\nspec=1.0, sens={sens:.2f}", xy=(fpr[j], tpr[j]),
                         xytext=(0.15, 0.94), fontsize=6, ha="left", va="center",
                         arrowprops=dict(arrowstyle="->", lw=0.6, connectionstyle="arc3,rad=0.15"))
+        ho_auc, ho_n, ho_skip = heldout_source_auc(risk, lab, src)
         out["results"][name] = {
             "positives": pos, "base_rate": round(pos / len(lab), 3),
-            "roc_auc": round(auc, 3), "loso_mean": round(m, 3), "loso_range": [round(lo, 3), round(hi, 3)],
+            "roc_auc_in_sample": round(auc, 3),
+            "delete_one_source_SENSITIVITY_range (NOT out-of-sample)":
+                [round(lo, 3), round(hi, 3)],
+            "heldout_source_auc_mean (genuinely out-of-sample)":
+                (round(ho_auc, 3) if ho_auc == ho_auc else None),
+            "heldout_sources_evaluable": ho_n, "heldout_sources_single_label": ho_skip,
             "operating_point_Youden_insample": {"threshold_risk": round(tau, 4), "sensitivity": round(sens, 3),
                                        "specificity": round(spec, 3), "PPV": round(ppv, 3), "NPV": round(npv, 3)},
             "operating_point_LOSO_outofsample": loso_operating_point(risk, lab, src)}

@@ -1,0 +1,29 @@
+{
+  "note": "spans and calibration slopes for Fig. 4(a),(b). Complete-case: only levels where all four cohorts are present. Prediction uses the counts-only affine fit alpha0 + kappa0 * HM_SE(0.5, .).",
+  "calibration": {
+    "alpha0": 0.0,
+    "kappa0": 1.405
+  },
+  "arms": {
+    "minority events": {
+      "levels_complete_case": 5,
+      "levels_total": 5,
+      "levels_dropped": 0,
+      "predicted_span": 0.0699,
+      "observed_span": 0.0313,
+      "calibration_slope": 0.429,
+      "calibration_slope_if_incomplete_levels_pooled": 0.429,
+      "within_cohort_r": -0.378
+    },
+    "total sample size $n$": {
+      "levels_complete_case": 3,
+      "levels_total": 4,
+      "levels_dropped": 1,
+      "predicted_span": 0.0244,
+      "observed_span": 0.0178,
+      "calibration_slope": 0.764,
+      "calibration_slope_if_incomplete_levels_pooled": 0.457,
+      "within_cohort_r": -0.319
+    }
+  }
+}

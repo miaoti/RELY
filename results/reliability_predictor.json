@@ -1,34 +1,133 @@
 {
+  "endpoint": "Delta_split = max_s(best-of-grid AUC) - mean_s(best-of-grid AUC) over the SAME 50 random 70/30 splits. The selection budget is B=50 SPLITS, not 750 candidates: each split is reduced to its grid-best before the max is taken.",
+  "class_direction": "n_pos = count of Target==1 (the class roc_auc_score treats as positive); test counts are the exact stratified held-out counts.",
+  "cohorts_where_positive_class_is_majority": 27,
   "n_cohorts": 50,
   "n_sources": 39,
-  "R2_observed_gap_vs": {
-    "hanley_mcneil_SE (closed-form 1-param)": 0.727,
-    "free multivariate {log n_pos, log n_neg, AUC} (3-param)": 0.813,
-    "log10(minority_events)": 0.586,
-    "log10(n)": 0.592,
-    "log10(dimensionality)": 0.091
+  "two_level_decomposition": {
+    "Delta_tuning (within-split, choosing the best of the grid on the test block)": 0.064,
+    "Delta_split (across splits, given each split is already test-tuned; B=50)": 0.137,
+    "Delta_total (both levels, relative to the unselected grand mean)": 0.201,
+    "note": "Delta_split is what the closed form models; it is NOT the whole selection optimism, because Delta_tuning is already absorbed into the per-split means."
+  },
+  "step1_does_closed_form_predict_observed_SD": {
+    "note": "no extreme-value assumption enters: does the closed form predict the OBSERVED split-to-split SD of the per-split best AUC?",
+    "R2_SD_vs_HM_SE(at pooled honest AUC)": 0.885,
+    "R2_SD_vs_HM_SE(a=0.5, class counts only)": 0.784,
+    "R2_SD_vs_log10_dimensionality": 0.092,
+    "slope_SD_on_SE(a=0.5)": 0.691
+  },
+  "step2_is_the_extreme_value_multiplier_stable": {
+    "note": "known extreme-value part; verified, not claimed. B = number of SPLITS (50), because each split has already been reduced to its grid-best AUC.",
+    "B_splits": 50,
+    "mean_ratio_delta_split_over_observedSD": 2.02,
+    "sd_of_ratio": 0.309,
+    "cv_of_ratio": 0.153,
+    "range": [
+      1.37,
+      2.81
+    ],
+    "iid_reference_E[(max-mean)/s]_for_B50": 2.261,
+    "interpretation": "the observed multiplier sits BELOW the independent-draw reference. We report this as an empirical observation, not a theorem: dependence among order statistics need not lower this ratio in general, and we did not derive a bound."
+  },
+  "R2_Delta_split_vs": {
+    "hanley_mcneil_SE (one predictor + intercept)": 0.816,
+    "hanley_mcneil_SE at a=0.5 (class counts only)": 0.674,
+    "free multivariate {log n_pos, log n_neg, AUC}": 0.733,
+    "log10(minority_events)": 0.619,
+    "log10(n)": 0.633,
+    "log10(dimensionality)": 0.091,
+    "incremental R2 of log10(d) over the count baseline": 0.0027
   },
   "robustness_R2": {
-    "leave_one_source_out": [
-      0.71,
-      0.792
+    "TRUE_leave_one_source_out_prediction (SE at pooled honest AUC)": 0.798,
+    "TRUE_leave_one_source_out_prediction (SE at a=0.5)": 0.642,
+    "delete_one_source_SENSITIVITY_range (influence, NOT out-of-sample)": [
+      0.804,
+      0.833
     ],
     "cluster_bootstrap_95CI": [
-      0.572,
-      0.862
-    ],
-    "fixed_working_point_a0.5 (no shared honest-AUC)": 0.654,
-    "fixed_working_point_a0.7": 0.642
+      0.729,
+      0.89
+    ]
   },
-  "kappa_fitted": 2.306,
-  "kappa_theoretical_B750": 3.639,
-  "effective_independent_selections_B_eff": 14.3,
-  "residual_sd": 0.053,
-  "caveat": "gap≈kappa*SE is partly confirmatory-by-construction (extreme-value); the load-bearing results are that it holds across 50 real pipelines and the contrast with dimensionality (R²≈0.09).",
-  "scope": "predicts the split-max (selection) component of optimism; not the feature-leakage component.",
-  "calculator (uses FITTED kappa=2.31, planning-level not per-study)": {
-    "min_minority_events_for_expected_gap<=0.05 (prev=0.3,AUC=0.5)": 847,
-    "min_minority_events_for_expected_gap<=0.10": 214,
-    "prediction_interval_note": "±0.10 AUC residual (95%); population-level planning heuristic"
+  "kappa_fitted (protocol-specific selection multiplier)": 1.609,
+  "fit_intercept": -0.0038,
+  "counts_only_fit (a=0.5; THIS is the calculator's calibration)": {
+    "kappa0": 1.405,
+    "R2": 0.669,
+    "residual_sd": 0.036,
+    "intercept": "constrained to zero",
+    "affine_alternative": {
+      "alpha0": -0.0131,
+      "kappa0": 1.524,
+      "R2": 0.674,
+      "residual_sd": 0.036
+    }
+  },
+  "zero_intercept_refit_at_working_point": {
+    "kappa": 1.571,
+    "R2": 0.8159,
+    "affine_R2_for_comparison": 0.8164,
+    "note": "constraining the intercept costs 0.0005 R2 here, so the comparative R2 table keeps an intercept for every predictor (equal treatment) while the planning tool uses the constrained one-parameter form."
+  },
+  "residual_sd": 0.027,
+  "scope": "models the split-shopping level of selection optimism, conditional on test-set tuning already having happened; silent on feature-selection leakage and shift.",
+  "calculator": {
+    "form": "expected Delta_split = kappa0 * HM_SE(0.5, exact held-out counts), fitted ON SE(0.5) with the intercept constrained to zero, because optimism must vanish as SE -> 0. The working-point fit belongs to Fig. 3 and must NOT be used here.",
+    "kappa0_used": 1.405,
+    "R2_of_this_fit": 0.669,
+    "why_no_intercept": {
+      "theory": "SE -> 0 implies Delta_split -> 0; the affine fit instead tends to -0.0131, which is not usable for extrapolation to large studies.",
+      "intercept_not_significant": {
+        "estimate": -0.0131,
+        "se": 0.0159,
+        "ci95": [
+          -0.0451,
+          0.019
+        ]
+      },
+      "cost_in_R2": {
+        "affine": 0.6736,
+        "zero_intercept_refit": 0.669
+      }
+    },
+    "min_minority_events": {
+      "delta<=0.05": 317,
+      "delta<=0.1": 80,
+      "delta<=0.15": 37
+    },
+    "SENSITIVITY_affine_fit": {
+      "note": "the unconstrained affine fit, reported for sensitivity only.",
+      "alpha0": -0.0131,
+      "kappa0": 1.524,
+      "R2": 0.674,
+      "min_minority_events": {
+        "delta<=0.05": 234,
+        "delta<=0.1": 74,
+        "delta<=0.15": 37
+      }
+    },
+    "WRONG_drop_intercept_keep_affine_slope": {
+      "note": "setting alpha to 0 while keeping the affine slope is neither fit; recorded so nobody re-derives it by mistake.",
+      "min_minority_events": {
+        "delta<=0.05": 370,
+        "delta<=0.1": 94,
+        "delta<=0.15": 44
+      }
+    },
+    "prediction_interval_note": "+/-0.07 AUC residual (95%)",
+    "WRONG_transfer_kept_for_the_record": {
+      "note": "applying the working-point (alpha, kappa) to SE(0.5), as the pre-round-26 code did: neither of the two fits, and measurably worse.",
+      "R2": 0.591,
+      "mean_over_prediction_of_Delta": 0.0176,
+      "min_minority_events": {
+        "delta<=0.05": 357,
+        "delta<=0.1": 97,
+        "delta<=0.15": 47
+      }
+    },
+    "cohorts_below_delta0.10_target": 36,
+    "patients_implied_at_prevalence_0.30": 267
   }
 }

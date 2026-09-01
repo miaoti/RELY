@@ -32,10 +32,16 @@ def r2(y, X):
 
 def analyze(csv, tag):
     d = pd.read_csv(csv)
-    gap = (d["test_selected_max"] - d["honest_auc"]).values
-    tpos = np.maximum(1, np.round(0.30 * d["minority"]).astype(int)).values
-    tneg = np.maximum(1, np.round(0.30 * (d["n"] - d["minority"])).astype(int)).values
-    se = np.array([hm_se(a, p, n) for a, p, n in zip(d["honest_auc"], tpos, tneg)])
+    # round-18: 主结局改为同协议内纯选择乐观 (max_b - mean_b)，与 reliability_predictor.py 一致
+    gap = (d["test_selected_max"] - d["test_selected_mean"]).values
+    # round-23: 真实正类方向 + 精确分层 test counts（旧代码把 minority 当 n_pos，
+    # 且用 round(0.3n)；实测 27/50 队列方向错、28/50 计数差 1）
+    from cohort_counts import counts_table
+    cts = counts_table(list(d["dataset"])).set_index("dataset")
+    tpos = cts.loc[d["dataset"], "te_pos"].values
+    tneg = cts.loc[d["dataset"], "te_neg"].values
+    hon = d["honest_pooled_auc"] if "honest_pooled_auc" in d.columns else d["honest_auc"]
+    se = np.array([hm_se(a, p, n) for a, p, n in zip(hon, tpos, tneg)])
     se05 = np.array([hm_se(0.5, p, n) for p, n in zip(tpos, tneg)])
     R2_se, b = r2(gap, se.reshape(-1, 1)); kappa = float(b[1])
     R2_se05, _ = r2(gap, se05.reshape(-1, 1))
@@ -44,7 +50,8 @@ def analyze(csv, tag):
     R2_counts, _ = r2(gap, counts)
     R2_counts_d, _ = r2(gap, np.column_stack([counts, np.log10(d["d"].values.astype(float))]))
     resid_sd = float(np.std(gap - b[0] - kappa * se, ddof=2))
-    summary = {"tag": tag, "n_cohorts": int(len(d)), "mean_gap": round(float(gap.mean()), 3),
+    summary = {"tag": tag, "endpoint": "Delta_selection = max_b - mean_b (within-protocol selection)",
+               "n_cohorts": int(len(d)), "mean_gap": round(float(gap.mean()), 3),
                "R2_SE_working_point": round(R2_se, 3), "R2_SE_a0.5_no_shared_term": round(R2_se05, 3),
                "R2_log_dimensionality": round(R2_d, 3),
                "R2_two_counts": round(R2_counts, 3), "R2_two_counts_plus_logd": round(R2_counts_d, 3),
@@ -57,8 +64,8 @@ def main():
     rf, drf = analyze(RESULTS / "radmlbench_sweep_rf.csv", "RF (no preselection)")
     lr, dlr = analyze(RESULTS / "radmlbench_sweep.csv", "l2-LR (paper)")
     # cross-cohort agreement: do the two learners flag the same cohorts as optimistic?
-    grf = drf[["dataset"]].copy(); grf["gap_rf"] = (drf["test_selected_max"] - drf["honest_auc"]).values
-    glr = dlr[["dataset"]].copy(); glr["gap_lr"] = (dlr["test_selected_max"] - dlr["honest_auc"]).values
+    grf = drf[["dataset"]].copy(); grf["gap_rf"] = (drf["test_selected_max"] - drf["test_selected_mean"]).values
+    glr = dlr[["dataset"]].copy(); glr["gap_lr"] = (dlr["test_selected_max"] - dlr["test_selected_mean"]).values
     m = pd.merge(grf, glr, on="dataset")
     r_cross = float(np.corrcoef(m["gap_rf"], m["gap_lr"])[0, 1]) if len(m) > 2 else float("nan")
     out = {"RF": rf, "LR": lr,

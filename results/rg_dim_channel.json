@@ -1,0 +1,358 @@
+{
+  "design": "fix n and class counts, vary d by random feature subsampling; same 70/30 splits, same (k,C) grid, same learner; only the feature-selection placement differs between arms.",
+  "endpoint": "Delta_selection = max_b - mean_b over splits (pure within-protocol selection)",
+  "cohorts": [
+    "Dong2022",
+    "Hosny2018A",
+    "Prostate-MRI-US-Biopsy",
+    "Song2020"
+  ],
+  "n_splits": 50,
+  "summary": {
+    "delta_selection|infold": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": -0.0001,
+      "ci95_cohort_t": [
+        -0.0258,
+        0.0256
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.0113,
+        0.0086
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0088,
+        0.0085
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0003,
+        "Hosny2018A": 0.0114,
+        "Prostate-MRI-US-Biopsy": 0.0046,
+        "Song2020": -0.0167
+      },
+      "pooled_within_r": 0.056
+    },
+    "delta_selection|leaky": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0036,
+      "ci95_cohort_t": [
+        -0.0297,
+        0.0368
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.009,
+        0.0155
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0071,
+        0.0148
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0163,
+        "Hosny2018A": 0.0147,
+        "Prostate-MRI-US-Biopsy": 0.0002,
+        "Song2020": -0.0169
+      },
+      "pooled_within_r": 0.192
+    },
+    "delta_selection|leaky_fixedk": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0067,
+      "ci95_cohort_t": [
+        -0.0066,
+        0.02
+      ],
+      "ci95_cohort_bootstrap": [
+        0.0018,
+        0.0116
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0046,
+        0.0191
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0092,
+        "Hosny2018A": 0.0141,
+        "Prostate-MRI-US-Biopsy": 0.0035,
+        "Song2020": 0.0
+      },
+      "pooled_within_r": 0.154
+    },
+    "delta_vs_honest|infold": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": -0.0049,
+      "ci95_cohort_t": [
+        -0.0332,
+        0.0235
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.0171,
+        0.0051
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0173,
+        0.0087
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0085,
+        "Hosny2018A": -0.0227,
+        "Prostate-MRI-US-Biopsy": -0.0051,
+        "Song2020": -0.0001
+      },
+      "pooled_within_r": -0.107
+    },
+    "delta_vs_honest|leaky": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0103,
+      "ci95_cohort_t": [
+        -0.0312,
+        0.0517
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.0036,
+        0.0275
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0042,
+        0.0275
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0367,
+        "Hosny2018A": 0.0115,
+        "Prostate-MRI-US-Biopsy": -0.0072,
+        "Song2020": -0.0001
+      },
+      "pooled_within_r": 0.268
+    },
+    "delta_vs_honest|leaky_fixedk": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0134,
+      "ci95_cohort_t": [
+        -0.0181,
+        0.045
+      ],
+      "ci95_cohort_bootstrap": [
+        0.0008,
+        0.026
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0016,
+        0.0292
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0242,
+        "Hosny2018A": 0.0279,
+        "Prostate-MRI-US-Biopsy": -0.0005,
+        "Song2020": 0.0021
+      },
+      "pooled_within_r": 0.294
+    },
+    "sel_max|infold": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": -0.0025,
+      "ci95_cohort_t": [
+        -0.0395,
+        0.0344
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.0163,
+        0.0119
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0141,
+        0.0081
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": -0.0081,
+        "Hosny2018A": -0.0223,
+        "Prostate-MRI-US-Biopsy": 0.0186,
+        "Song2020": 0.0017
+      },
+      "pooled_within_r": -0.121
+    },
+    "sel_max|leaky": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0126,
+      "ci95_cohort_t": [
+        -0.0046,
+        0.0298
+      ],
+      "ci95_cohort_bootstrap": [
+        0.0054,
+        0.0183
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        0.005,
+        0.0211
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0201,
+        "Hosny2018A": 0.012,
+        "Prostate-MRI-US-Biopsy": 0.0165,
+        "Song2020": 0.0017
+      },
+      "pooled_within_r": 0.452
+    },
+    "sel_max|leaky_fixedk": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0157,
+      "ci95_cohort_t": [
+        -0.0099,
+        0.0414
+      ],
+      "ci95_cohort_bootstrap": [
+        0.0056,
+        0.0258
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        0.007,
+        0.0264
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": 0.0075,
+        "Hosny2018A": 0.0284,
+        "Prostate-MRI-US-Biopsy": 0.0233,
+        "Song2020": 0.0038
+      },
+      "pooled_within_r": 0.304
+    },
+    "honest|infold": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0023,
+      "ci95_cohort_t": [
+        -0.0332,
+        0.0379
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.012,
+        0.0179
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0122,
+        0.0146
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": -0.0166,
+        "Hosny2018A": 0.0004,
+        "Prostate-MRI-US-Biopsy": 0.0237,
+        "Song2020": 0.0017
+      },
+      "pooled_within_r": 0.013
+    },
+    "honest|leaky": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0023,
+      "ci95_cohort_t": [
+        -0.0332,
+        0.0379
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.012,
+        0.0179
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0122,
+        0.0146
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": -0.0166,
+        "Hosny2018A": 0.0004,
+        "Prostate-MRI-US-Biopsy": 0.0237,
+        "Song2020": 0.0017
+      },
+      "pooled_within_r": 0.013
+    },
+    "honest|leaky_fixedk": {
+      "n_cohorts": 4,
+      "n_cohort_x_seed_slopes": 12,
+      "mean_slope": 0.0023,
+      "ci95_cohort_t": [
+        -0.0332,
+        0.0379
+      ],
+      "ci95_cohort_bootstrap": [
+        -0.012,
+        0.0179
+      ],
+      "ci95_PSEUDOREPLICATED_do_not_report": [
+        -0.0122,
+        0.0146
+      ],
+      "per_cohort_slopes": {
+        "Dong2022": -0.0166,
+        "Hosny2018A": 0.0004,
+        "Prostate-MRI-US-Biopsy": 0.0237,
+        "Song2020": 0.0017
+      },
+      "pooled_within_r": 0.013
+    },
+    "PAIRED sel_max|leaky-infold": {
+      "n_cohorts": 4,
+      "mean_difference": 0.0151,
+      "ci95_paired_t": [
+        -0.0254,
+        0.0556
+      ],
+      "per_cohort": {
+        "Dong2022": 0.0282,
+        "Hosny2018A": 0.0342,
+        "Prostate-MRI-US-Biopsy": -0.0021,
+        "Song2020": 0.0
+      }
+    },
+    "PAIRED sel_max|leaky_fixedk-infold": {
+      "n_cohorts": 4,
+      "mean_difference": 0.0183,
+      "ci95_paired_t": [
+        -0.0298,
+        0.0664
+      ],
+      "per_cohort": {
+        "Dong2022": 0.0156,
+        "Hosny2018A": 0.0506,
+        "Prostate-MRI-US-Biopsy": 0.0047,
+        "Song2020": 0.0022
+      }
+    },
+    "PAIRED delta_selection|leaky-infold": {
+      "n_cohorts": 4,
+      "mean_difference": 0.0037,
+      "ci95_paired_t": [
+        -0.0153,
+        0.0227
+      ],
+      "per_cohort": {
+        "Dong2022": 0.016,
+        "Hosny2018A": 0.0034,
+        "Prostate-MRI-US-Biopsy": -0.0045,
+        "Song2020": -0.0003
+      }
+    },
+    "PAIRED delta_selection|leaky_fixedk-infold": {
+      "n_cohorts": 4,
+      "mean_difference": 0.0068,
+      "ci95_paired_t": [
+        -0.01,
+        0.0236
+      ],
+      "per_cohort": {
+        "Dong2022": 0.009,
+        "Hosny2018A": 0.0027,
+        "Prostate-MRI-US-Biopsy": -0.0012,
+        "Song2020": 0.0167
+      }
+    }
+  },
+  "conclusion": "Holding n and the class counts fixed and varying only d: the WITHIN-PROTOCOL selection optimism (max minus mean over the same splits) does not grow with d in any arm (in-fold -0.0001, leaky-grid +0.0036, leaky-fixed-k +0.0067 AUC per decade of d). Where d does act is on the LEVEL of a leakage-contaminated maximum when the number of selected features is held fixed while the pool grows: the shopped maximum moves +0.0157 AUC/decade under fixed-k full-data selection versus -0.0025 with selection kept in-fold, while honest discrimination itself moves +0.0023. This is the configuration used in results/rd_dose_response.csv, which is why that file shows d correlating with its protocol-crossing gap while the selection optimism modelled in this paper does not."
+}

@@ -20,8 +20,8 @@ import honest_eval as he
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
-FIELDS = ["subset", "n_features", "auc_mean", "auc_lo", "auc_hi", "nb_se",
-          "brier", "ece", "sens", "spec"]
+FIELDS = ["subset", "n_features", "auc_mean", "auc_fold_mean", "auc_lo", "auc_hi", "nb_se",
+          "fold_p2.5", "fold_p97.5", "brier", "ece", "sens", "spec"]
 
 
 def feature_subsets(df):
@@ -76,8 +76,15 @@ def main():
         r = he.honest_nested_cv(X, y, repeats=args.repeats, seed=he.MASTER_SEED,
                                 n_jobs=3, grid=grid_for(X.shape[1]))
         row = {"subset": name, "n_features": X.shape[1],
-               "auc_mean": round(r["mean"], 4), "auc_lo": round(r["p2.5"], 3),
-               "auc_hi": round(r["p97.5"], 3), "nb_se": round(r["auc_nb_se"], 4),
+               # round-18：区间改用【患者级 bootstrap】的池化 OOF AUC 区间，
+               # 不再用折分数的 2.5/97.5 百分位（那是折间离散度、不是置信区间）。
+               # round-25：点估计也改成 pooled OOF —— 此前点估计用折均值、区间用 pooled，
+               # 两者不是同一个估计量（AIS 全影像组学子集上差 0.017）。折均值留作诊断列。
+               "auc_mean": round(r["pooled_auc"], 4),
+               "auc_fold_mean": round(r["mean"], 4),
+               "auc_lo": round(r["boot_ci_lo"], 3),
+               "auc_hi": round(r["boot_ci_hi"], 3), "nb_se": round(r["auc_nb_se"], 4),
+               "fold_p2.5": round(r["p2.5"], 3), "fold_p97.5": round(r["p97.5"], 3),
                "brier": round(r["brier"], 4), "ece": round(r["ece"], 4),
                "sens": round(r["sensitivity"], 4), "spec": round(r["specificity"], 4)}
         with open(out, "a", newline="", encoding="utf-8") as f:

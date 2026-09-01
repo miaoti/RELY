@@ -1,0 +1,34 @@
+{
+  "note": "the toolkit run end to end on the AIS cohort, before any AUC exists. Every input is read from the other artifacts; nothing is hard-coded.",
+  "n": 183,
+  "events": 57,
+  "held_out_counts": {
+    "pos": 17,
+    "neg": 38
+  },
+  "SE_null_point": 0.085,
+  "calculator": {
+    "calibration": {
+      "kappa0": 1.405,
+      "R2": 0.669,
+      "intercept": "constrained to zero",
+      "fitted_on": "SE at a=0.5, the only working point available before modeling"
+    },
+    "predicted_delta_split": 0.1194,
+    "observed_delta_split": 0.1389,
+    "residual": 0.0195,
+    "residual_sd_of_fit": 0.036,
+    "within_1_residual_sd": true,
+    "min_events_for_delta_0.10": 80,
+    "events_available": 57,
+    "verdict": "warns"
+  },
+  "gate": {
+    "score": 0.2377,
+    "threshold": 0.2779,
+    "c_units_only": 2.797,
+    "flags": false,
+    "label_is_true": false,
+    "correct": true
+  }
+}

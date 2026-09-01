@@ -8,7 +8,7 @@ A fill-in protocol to **freeze the evaluation before you see results**: the prim
 
 ## 1. Primary outcome and positive class
 - Outcome: `<define>`; positive class = `<define>`. State the class counts `n₊` (events) and `n₋`.
-- If the label's provenance is uncertain, state it here and treat it as a limitation (it can only bias the honest estimate toward chance, not manufacture signal).
+- If the label's provenance is uncertain, state it here and treat it as a limitation: it biases the honest estimate toward chance and also changes the split-to-split variability, so neither the honest estimate nor the optimism gap is immune to it.
 
 ## 2. Single primary model (confirmatory): one, fixed in advance
 Leakage-free pipeline; every `fit` happens inside the inner **training** folds only:
@@ -19,8 +19,8 @@ Leakage-free pipeline; every `fit` happens inside the inner **training** folds o
 
 ## 3. Primary metric
 - **ROC-AUC under repeated stratified _nested_ cross-validation** (outer stratified k-fold × R repeats; inner folds tune and select).
-- Compute AUC **per outer fold, then aggregate** over folds × repeats (mean + 2.5–97.5 percentile interval). **Never pool out-of-fold predictions into a single ROC.**
-- Estimate variance with the **Nadeau–Bengio (2003) corrected resampling** variance.
+- Within each repeat every case receives exactly one out-of-fold prediction; compute one **pooled out-of-fold (cross-fitted) AUC per repeat** and average over repeats. Take the interval by a **patient-level bootstrap** of the pooled out-of-fold predictions (resample cases, 2000 replicates; conditional on the cross-fitted predictions, so it captures sampling variation in the patients, not in the refitting). Do **not** report the 2.5–97.5 percentiles of per-fold AUC scores as a confidence interval: folds are dependent and small, and their spread is far too wide.
+- Report the **Nadeau–Bengio (2003)** corrected-variance interval as a concordant second reading and use it for paired comparisons.
 
 ## 4. Secondary metrics (same nested CV)
 Brier, ECE / calibration, sensitivity–specificity, and class-conditional conformal coverage with binomial (Wilson) intervals. Pre-specify these as secondary.
@@ -28,22 +28,23 @@ Brier, ECE / calibration, sensitivity–specificity, and class-conditional confo
 ## 5. Feature selection
 - In-fold only (`SelectKBest` inside each training fold); compute any selection-frequency/stability statistics on training folds. **Never inspect the outer test fold.**
 
-## 6. Optimism-gap definition (pre-specify)
-Same data, same feature pool, same model family; vary **only the evaluation protocol**:
-- **Honest** = nested-CV AUC (the primary metric above).
-- **Optimistic** = the maximum over many random train/test splits crossed with the tuning grid, with model/threshold chosen on the test set (a deliberate bad-practice arm, labeled as such).
-- **Reported optimism `Δ = max selected test-AUC − honest AUC`.**
+## 6. Optimism definition (pre-specify)
+Same data, same feature pool, same learner; vary **only the evaluation protocol**, and keep the two selection levels apart:
+- **Within-split tuning** `Δ_tune`: the mean over splits of the best test-block setting, minus the mean over all splits and settings.
+- **Split shopping** `Δ_split = max_s M_s − mean_s M_s`, where `M_s` is the best test AUC of split `s` over the tuning grid, across `S` random train/test splits of one fixed protocol (the paper uses S=50, 70/30 splits, feature selection inside each training split). Its selection budget is the number of splits, not the number of raw evaluations, and it is the quantity the RELY calculator predicts.
+- The contrast `max_s M_s − honest AUC` is **secondary**: it also changes the estimator and the training fraction, so report it as a contrast, never as the modelled quantity.
+- Any arm that selects features on all the data before splitting is a **leakage** arm; list it separately and label it as such.
 
 ## 7. Statistical tests
 - Primary model vs a parsimonious clinical baseline: paired test on **per-fold AUC differences** (Nadeau–Bengio corrected), **not** DeLong on pooled-CV predictions.
-- Label-permutation null ≥ 1000 draws, **re-running the entire pipeline (including feature selection) on each draw**; report the p-value.
+- Label-permutation null: re-run the **entire nested estimator** (including feature selection) on each draw and report the p-value; use as many draws as the budget allows (the worked example uses 200). A cheaper stand-in that skips the refitting is not a substitute.
 - Coverage / proportion estimates: binomial (Wilson) confidence intervals.
 
 ## 8. Pre-modeling evaluability (decide before modeling)
-Before any modeling, run the RELY **gate** and **calculator** on the class counts alone:
-- The gate flags whether the cohort can be evaluated honestly at all (whether the honest CI is expected to cover chance).
-- The calculator returns the minority-event target needed to bound the expected reported optimism at your tolerance `δ`.
-Treat a flagged cohort's reported discrimination as **unverifiable** until the honest, leakage-free estimate is in hand.
+Before any modeling, run the RELY **gate** and **calculator** on the exact held-out class counts alone (`src/cohort_counts.py` defines them; `n₊` is the class the AUC treats as positive, and the Hanley–McNeil form is not symmetric in the two):
+- The gate scores the cohort by the Hanley–McNeil standard error at AUC 0.5 and flags an expected split-shopping optimism of at least `δ = 0.15` AUC (in-sample ROC-AUC 0.91 on the 50-cohort benchmark; threshold chosen leave-one-source-out, sensitivity 0.81 at specificity 0.90). It does **not** predict honest performance, so a non-flag is not a clearance.
+- The calculator returns the minority-event count needed to bound the expected split-shopping optimism at your tolerance `δ` (zero-intercept fit `κ₀ = 1.405` on the null working point; about 80 events for `δ ≤ 0.10` and 317 for `δ ≤ 0.05` at prevalence 0.3).
+Read any single-split discrimination you later report against the optimism the counts already imply, and state the calculator's target next to your actual event count.
 
 ## 9. Multiplicity
 One primary model and one primary metric. Everything else is secondary/exploratory and reported as-is: do **not** take the maximum over configurations, and do **not** select models/thresholds on the test set (except the explicitly-labeled "optimistic" demonstration arm).

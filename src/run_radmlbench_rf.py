@@ -57,8 +57,10 @@ def honest_rf(X, y, repeats=3):
     return float(a.mean()), float(np.percentile(a, 2.5)), float(np.percentile(a, 97.5))
 
 
-def test_tuned_rf(X, y, n_splits=30):
-    """Selection optimism: max over random 70/30 splits x the RF grid, tuned on the test set."""
+def test_tuned_rf(X, y, n_splits=50):
+    """Selection optimism: max over random 70/30 splits x the RF grid, tuned on the test set.
+    n_splits 必须等于主协议的 50：kappa 随 log B 增长，用 30 会让 RF 的 kappa 系统性偏低，
+    与 l2-LR 的 1.61 不可比（round-25 外审指出）。"""
     best = []
     for s in range(n_splits):
         Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.30, stratify=y, random_state=s)
@@ -92,10 +94,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--only", type=str, default="")
+    ap.add_argument("--fresh", action="store_true",
+                    help="忽略断点续跑缓存：把已有产物归档到 results/_archive/ 后从零重跑")
     args = ap.parse_args()
     todo = [s.strip() for s in args.only.split(",") if s.strip()] or rb.listDatasets()
     RESULTS.mkdir(exist_ok=True)
     out = RESULTS / "radmlbench_sweep_rf.csv"
+    _fresh(out, getattr(args, "fresh", False))
     done = set()
     if out.exists():
         try:
@@ -118,6 +123,20 @@ def main():
         except Exception as e:
             print(f"  [{i}/{len(pend)}] {name:26} FAILED {type(e).__name__}: {e}", flush=True)
     print(f"[done] {time.time()-t0:.0f}s -> {out}  ({len(pd.read_csv(out))} cohorts)", flush=True)
+
+
+def _fresh(out, enabled):
+    """--fresh: 把已有产物挪进 results/_archive/，让断点续跑从零开始（可复现性要求）。"""
+    if not enabled or not out.exists():
+        return
+    arch = out.parent / "_archive"
+    arch.mkdir(exist_ok=True)
+    i, dest = 0, arch / out.name
+    while dest.exists():
+        i += 1
+        dest = arch / ("%s.%d%s" % (out.stem, i, out.suffix))
+    out.replace(dest)
+    print("[fresh] archived %s -> %s" % (out.name, dest))
 
 
 if __name__ == "__main__":
