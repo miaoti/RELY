@@ -236,7 +236,7 @@ def main():
 
     ridge(null, yb["honest"], figstyle.GREEN)      # honest nested-CV null (green, paper-wide)
     # 一律用 B=50（与论文主口径、与下面的 rung 完全一致；此前山脊用 500、rung 用 50）。
-    ridge(fixed_b, yb["cherry"], figstyle.ORANGE)  # 折内固定协议 (k=30, C=1) 的逐划分分布
+    ridge(fixed_b, yb["cherry"], figstyle.BLUE)  # 折内固定协议 (k=30, C=1) 的逐划分分布
     ridge(tuned_b, yb["top"], figstyle.RED)        # 再加 test-set (k,C) 调参
     ax.text(0.383, 0.33, "permutation null\n(labels shuffled), $p$=%.2f" % pval, fontsize=6.1,
             color="#0a6b4e", style="italic", ha="center", va="center", zorder=12, linespacing=0.95)
@@ -249,10 +249,10 @@ def main():
                     ha="center", va="bottom", fontsize=11, fontweight="bold", color=color, zorder=12)
 
     rung(honest, yb["honest"], figstyle.GREEN, f"{honest:.2f}")
-    rung(fixed_max, yb["cherry"], figstyle.ORANGE, f"{fixed_max:.2f}")
+    rung(fixed_max, yb["cherry"], figstyle.BLUE, f"{fixed_max:.2f}")
     rung(top, yb["top"], figstyle.RED, f"{top:.2f}")
     ax.text(fixed_max + 0.012, yb["cherry"] + RH * 0.60, "max of\n50 splits", fontsize=5.7,
-            color=figstyle.ORANGE, style="italic", ha="left", va="center", linespacing=0.92, zorder=12)
+            color=figstyle.BLUE, style="italic", ha="left", va="center", linespacing=0.92, zorder=12)
     ax.text(top + 0.012, yb["top"] + RH * 0.60, "max of\n50$\\times$grid", fontsize=5.7,
             color=figstyle.RED, style="italic", ha="left", va="center", linespacing=0.92, zorder=12)
 
@@ -263,11 +263,12 @@ def main():
         ax.text(lx, ly, txt, fontsize=6.8, color="black", ha="center", va="center",
                 style="italic", bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none", alpha=0.85))
     climb(honest, yb["honest"] + RH, fixed_max, yb["cherry"] + 0.02, "+ split luck", 0.560, 1.02, 0.06)
-    climb(fixed_max, yb["cherry"] + RH, top, yb["top"] + 0.02, "+ test-set\n($k,C$) tuning", 0.585, 2.06, 0.08)
+    # 这个标签往右上挪：在 0.585/2.06 处它压在 "0.56" 那个 rung 数字上（改配色之前就压着）。
+    climb(fixed_max, yb["cherry"] + RH, top, yb["top"] + 0.02, "+ test-set\n($k,C$) tuning", 0.638, 2.14, 0.08)
 
     ax.set_yticks([yb["honest"] + RH / 2, yb["cherry"] + RH / 2, yb["top"] + RH / 2])
     ax.set_yticklabels(["honest\nnested CV", "fixed protocol\n(best of 50 splits)", "+ test-set\n($k,C$) tuning"])
-    for t, col in zip(ax.get_yticklabels(), [figstyle.GREEN, figstyle.ORANGE, figstyle.RED]):
+    for t, col in zip(ax.get_yticklabels(), [figstyle.GREEN, figstyle.BLUE, figstyle.RED]):
         t.set_color(col); t.set_fontweight("bold"); t.set_fontsize(6.9); t.set_linespacing(1.4)
     ax.tick_params(axis="y", length=0, pad=2)
     ax.set_xlim(XMIN, XMAX); ax.set_ylim(-0.16, yb["top"] + RH + 0.30)

@@ -40,7 +40,7 @@ def fig_f2():
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.hist(null, bins=30, color="#9ecae1", edgecolor="white", label=f"Permutation null (N={d['n_permutations']})")
     ax.axvline(0.5, color="grey", ls=":", lw=1, label="chance = 0.5")
-    ax.axvline(obs, color="#d62728", lw=2, label=f"Observed AUC = {obs:.3f}")
+    ax.axvline(obs, color="#B2182B", lw=2, label=f"Observed AUC = {obs:.3f}")
     ax.set_xlabel("ROC-AUC"); ax.set_ylabel("Count")
     ax.set_title(f"F2 - ICC label-permutation test  (p = {p:.3f})")
     ax.legend(fontsize=8)
@@ -58,8 +58,8 @@ def fig_c2(name):
     marg, mond = cov("marg"), cov("mond")
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(targets, targets, color="grey", ls="--", lw=1, label="nominal (ideal)")
-    ax.plot(targets, marg, "o-", color="#d62728", label="Marginal conformal - minority")
-    ax.plot(targets, mond, "s-", color="#2ca02c", label="Class-conditional (Mondrian) - minority")
+    ax.plot(targets, marg, "o-", color="#B2182B", label="Marginal conformal - minority")
+    ax.plot(targets, mond, "s-", color="#009E73", label="Class-conditional (Mondrian) - minority")
     ax.set_xlabel("Nominal coverage 1-alpha"); ax.set_ylabel("Empirical minority-class coverage")
     ax.set_title(f"C2 - Minority coverage: marginal vs class-conditional ({name})", fontsize=10)
     ax.legend(fontsize=8); ax.grid(alpha=0.3)
@@ -81,7 +81,7 @@ def fig_f3():
     acc_at = np.cumsum(correct) / np.arange(1, n + 1)
     base = max(y.mean(), 1 - y.mean())
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(cov, acc_at, color="#1f77b4", label="Accuracy of top-confidence retained fraction")
+    ax.plot(cov, acc_at, color="#0072B2", label="Accuracy of top-confidence retained fraction")
     ax.axhline(base, color="grey", ls="--", lw=1, label=f"Majority-class baseline = {base:.3f}")
     ax.set_xlabel("Coverage (retained fraction)"); ax.set_ylabel("Accuracy")
     ax.set_title("F3 - ICC risk-coverage (selective classification)")
@@ -97,7 +97,7 @@ def fig_f1():
     cherry = d["naive_single_split"]["max"]; tsel = d["test_set_selected_single_split"]["mean"]
     labels = ["Honest\nnested-CV", "Naive single\nsplit (mean)", "Test-set\nmodel selection", "Cherry-picked\nsplit (best/300)"]
     vals = [honest, naive, tsel, cherry]
-    colors = ["#2ca02c", "#9ecae1", "#fdae6b", "#d62728"]
+    colors = ["#009E73", "#9ecae1", "#0072B2", "#B2182B"]
     fig, ax = plt.subplots(figsize=(7, 4))
     bars = ax.bar(labels, vals, color=colors, edgecolor="white")
     ax.axhline(0.5, color="grey", ls=":", lw=1, label="chance = 0.5")
@@ -122,15 +122,15 @@ def fig_c1():
     icc_epv, icc_honest = 57 / 1004, icc["honest_nested_cv"]["mean"]
     icc_gap = icc["gap_testselected_minus_honest"]
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
-    ax1.scatter(df["epv"], df["optimism_gap"], c="#1f77b4", s=28, label=f"radMLBench (N={len(df)})")
-    ax1.scatter([icc_epv], [icc_gap], c="#d62728", s=120, marker="*", zorder=5, label="ICC (our cohort)")
+    ax1.scatter(df["epv"], df["optimism_gap"], c="#0072B2", s=28, label=f"radMLBench (N={len(df)})")
+    ax1.scatter([icc_epv], [icc_gap], c="#B2182B", s=120, marker="*", zorder=5, label="ICC (our cohort)")
     ax1.axhline(0, color="grey", ls=":", lw=1)
     ax1.set_xscale("log"); ax1.set_xlabel("EPV (events per feature, log)")
     ax1.set_ylabel("Optimism gap (test-selected - honest)")
     ax1.set_title("C1 - optimism gap vs EPV across real radiomics cohorts")
     ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
-    ax2.scatter(df["epv"], df["honest_auc"], c="#1f77b4", s=28)
-    ax2.scatter([icc_epv], [icc_honest], c="#d62728", s=120, marker="*", zorder=5, label="ICC")
+    ax2.scatter(df["epv"], df["honest_auc"], c="#0072B2", s=28)
+    ax2.scatter([icc_epv], [icc_honest], c="#B2182B", s=120, marker="*", zorder=5, label="ICC")
     ax2.axhline(0.5, color="grey", ls=":", lw=1, label="chance")
     ax2.set_xscale("log"); ax2.set_xlabel("EPV (log)"); ax2.set_ylabel("Honest nested-CV AUC")
     ax2.set_title("Honest AUC vs EPV"); ax2.legend(fontsize=8); ax2.grid(alpha=0.3)

@@ -50,7 +50,7 @@ def main():
     FIGS.mkdir(exist_ok=True)
     fig, ax = plt.subplots(figsize=(5.5, 5.5))
     ax.plot([0, 1], [0, 1], "k:", lw=1, label="perfectly calibrated")
-    colors = {"uncalibrated": "#d62728", "Platt(sigmoid)": "#2ca02c", "isotonic": "#1f77b4"}
+    colors = {"uncalibrated": "#B2182B", "Platt(sigmoid)": "#009E73", "isotonic": "#0072B2"}
     for name, (mp, fp) in curves.items():
         ax.plot(mp, fp, "o-", color=colors[name], ms=4,
                 label=f"{name} (Brier {out[name]['brier']:.3f}, ECE {out[name]['ece']:.3f})")

@@ -154,7 +154,7 @@ def main():
     fig, ax = plt.subplots(figsize=(7, 4))
     fams = families
     vals = [fam_freq[f] for f in fams]
-    ax.bar(fams, vals, color="#4292c6", edgecolor="white")
+    ax.bar(fams, vals, color="#0072B2", edgecolor="white")
     ax.axhline(0.5, color="grey", ls="--", lw=1, label="stability threshold 0.5")
     ax.set_ylabel("Mean selection frequency (sparse-group)")
     ax.set_xlabel("Radiomic feature family")

@@ -40,9 +40,9 @@ def numbers():
         "r2_heldout_source": r["robustness_R2"]["TRUE_leave_one_source_out_prediction (SE at a=0.5)"],
     }
 
-BAND = "#eef2f7"      # bottom insight band fill
-COHORT_FC = "#eaf1f8"
-H_FC, C_FC = "#e8f5ef", "#fdece6"   # honest / cherry card tints
+BAND = fs.TINT_N          # bottom insight band fill
+COHORT_FC = fs.TINT_N     # 顶部"数据本身"那一框不带叙事含义，用中性底
+H_FC, C_FC = fs.TINT_H, fs.TINT_C   # honest / cherry card tints
 
 
 def fit_text(ax, x, y, txt, max_w, fontsize, **kw):
@@ -74,7 +74,7 @@ def main():
     ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.set_axis_off()
 
     # ---------- cohort (top) ----------
-    card(ax, 0.045, 0.875, 0.91, 0.108, fs.BLUE, COHORT_FC)
+    card(ax, 0.045, 0.875, 0.91, 0.108, fs.SLATE, COHORT_FC)
     ax.text(0.50, 0.948, "one small radiomics cohort", ha="center", va="center",
             fontsize=8, fontweight="bold")
     ax.text(0.50, 0.910, r"$n_+ = %d$ events,   $n_- = %d$,   %d features"
@@ -117,12 +117,12 @@ def main():
 
     # ---------- optimism gap (explicit arithmetic in a pill — unambiguous) ----------
     ax.add_patch(FancyBboxPatch((0.255, 0.378), 0.49, 0.094,
-                 boxstyle="round,pad=0.004,rounding_size=0.02", fc="#fdece6", ec="#b0410d", lw=1.2, zorder=2))
+                 boxstyle="round,pad=0.004,rounding_size=0.02", fc=fs.TINT_C, ec=fs.RED, lw=1.2, zorder=2))
     ax.text(0.50, 0.448, "selection optimism", ha="center", va="center",
-            fontsize=7.6, color="#b0410d", fontweight="bold")
+            fontsize=7.6, color=fs.RED, fontweight="bold")
     ax.text(0.50, 0.407, r"$%.2f - %.2f = %.2f$" % (N["best"], N["typical"], N["delta"]),
             ha="center", va="center",
-            fontsize=8.6, color="#b0410d", fontweight="bold")
+            fontsize=8.6, color=fs.RED, fontweight="bold")
 
     # arrow into the insight band
     ax.annotate("", xy=(0.50, 0.312), xytext=(0.50, 0.372),

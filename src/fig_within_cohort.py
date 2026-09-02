@@ -123,9 +123,9 @@ def panel(ax, df, xcol, title, xlabel, invert=False, logx=False, kap=None):
 
 
 ARM_STYLE = {                       # 三个选择臂：折内 / 全数据选特征(k 可调) / 全数据选特征(k 固定)
-    "infold":       ("selection in-fold",            figstyle.RED, "-"),
-    "leaky":        ("full-data selection, $k$ tuned", "#8c6bb1",   "--"),
-    "leaky_fixedk": ("full-data selection, $k{=}30$",  "#3182bd",   ":"),
+    "infold":       ("selection in-fold",            figstyle.C_INFOLD,      "-"),
+    "leaky":        ("full-data selection, $k$ tuned", figstyle.C_LEAKY,     "--"),
+    "leaky_fixedk": ("full-data selection, $k{=}30$",  figstyle.C_LEAKY_FIXK, ":"),
 }
 
 

@@ -129,11 +129,11 @@ def main():
         full = (pc.notna().all(axis=1) & ph.notna().all(axis=1)).values
         x = pc.index.values
         xf, mcf, mhf = x[full], pc.mean(axis=1).values[full], ph.mean(axis=1).values[full]
-        ax.fill_between(xf, mhf, mcf, color=figstyle.ORANGE, alpha=0.12, zorder=1)
+        ax.fill_between(xf, mhf, mcf, color=figstyle.RED, alpha=0.10, zorder=1)
         ax.plot(xf, mcf, "-", color=CH, lw=2.7, zorder=5, solid_capstyle="round")
         ax.plot(xf, mhf, "--", color=HO, lw=2.4, zorder=5)
         ax.annotate("optimism\ngap", xy=(xf[len(xf) // 2], (mcf[len(xf) // 2] + mhf[len(xf) // 2]) / 2),
-                    fontsize=6.3, color="#b35e00", ha="center", va="center", style="italic")
+                    fontsize=6.3, color=figstyle.RED, ha="center", va="center", style="italic")
         if (~full).any():                      # mark where <4 cohorts remain (mean not drawn there)
             xcut = xf.max()
             ax.axvline(xcut, color="0.6", ls=(0, (1, 1.5)), lw=0.8, zorder=1)

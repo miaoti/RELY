@@ -119,7 +119,7 @@ def main():
     # 图
     df = pd.read_csv(out)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.3))
-    for a, col in [(0.2, "#d62728"), (0.1, "#1f77b4")]:
+    for a, col in [(0.2, "#B2182B"), (0.1, "#0072B2")]:
         ax1.scatter(df["mean_m"], df[f"marg_undercov_a{a}"], c=col, s=28, label=f"marginal, α={a}")
         ax1.axvline(math.ceil(1 / a) - 1, color=col, ls=":", lw=1)
     ax1.axhline(0, color="grey", lw=1)
@@ -127,7 +127,7 @@ def main():
     ax1.set_ylabel("minority undercoverage = (1−α) − coverage")
     ax1.set_title("C2 - minority undercoverage is cohort-dependent (weak vs m, r=-0.18)")
     ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
-    for a, col in [(0.2, "#d62728"), (0.1, "#1f77b4")]:
+    for a, col in [(0.2, "#B2182B"), (0.1, "#0072B2")]:
         ax2.scatter(df["mean_m"], df[f"mond_setsize_a{a}"], c=col, s=28, label=f"class-cond, α={a}")
         ax2.axvline(math.ceil(1 / a) - 1, color=col, ls=":", lw=1)
     ax2.axhline(1, color="grey", ls="--", lw=1, label="informative (size→1)")

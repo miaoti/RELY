@@ -336,9 +336,9 @@ def main():
     panels = [("delta_selection", r"(a) within-protocol selection  $\Delta=\max_b-\mathrm{mean}_b$"),
               ("delta_vs_honest", r"(b) protocol-crossing gap  $\max_b-\mathrm{AUC}^{\mathrm{honest}}$")]
     for ax, (ycol, title) in zip(axes, panels):
-        for arm, col, lab in (("leaky_fixedk", figstyle.ORANGE, "full-data selection, $k$ fixed"),
-                              ("leaky", figstyle.RED, "full-data selection, $k$ tuned"),
-                              ("infold", figstyle.GREEN, "in-fold selection (no leakage)")):
+        for arm, col, lab in (("leaky_fixedk", figstyle.C_LEAKY_FIXK, "full-data selection, $k$ fixed"),
+                              ("leaky", figstyle.C_LEAKY, "full-data selection, $k$ tuned"),
+                              ("infold", figstyle.C_INFOLD, "in-fold selection (no leakage)")):
             sub = df[df.arm == arm]
             for i, (c, s) in enumerate(sub.groupby("cohort")):
                 s = s.sort_values("d")

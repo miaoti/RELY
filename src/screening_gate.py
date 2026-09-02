@@ -115,7 +115,7 @@ def main():
     legstyle = {"selection inflation (Delta_selection >= %.2f)" % DELTA:
                     dict(color=figstyle.GREEN, lw=2.6, zorder=5),
                 "fabricate (max>=0.80 & honest<0.65)":
-                    dict(color="#9a9a9a", lw=1.0, alpha=0.85, zorder=2)}
+                    dict(color=figstyle.GREY, lw=1.0, alpha=0.85, zorder=2)}
     out = {"n_cohorts": int(len(d)), "B": B, "kappa": round(kappa, 3),
            "score": "risk = c * Hanley-McNeil SE(AUC=0.5, exact stratified held-out class counts from cohort_counts.exact_test_counts, n_pos = the class roc_auc_score treats as positive). ROC-AUC is invariant to the positive constant c, so this is a RANK score, not a calibrated expected optimism; the calculator (which does need a calibrated value) uses the fitted kappa instead.",
            "label_primary": "Delta_selection >= %.2f (measured: max_b - mean_b over the same splits x grid)" % DELTA,

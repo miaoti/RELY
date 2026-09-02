@@ -95,8 +95,8 @@ def main():
     # 图：左=gap vs log10(events)+fit；右=维度 added-variable（斜率≈0）
     FIGS.mkdir(exist_ok=True)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.3))
-    ax1.scatter(lmin, gap, c="#1f77b4", s=30, label=f"radMLBench (N={len(d)})")
-    ax1.scatter([np.log10(icc_min)], [icc_gap], c="#d62728", s=130, marker="*", zorder=5, label="ICC (case study)")
+    ax1.scatter(lmin, gap, c="#0072B2", s=30, label=f"radMLBench (N={len(d)})")
+    ax1.scatter([np.log10(icc_min)], [icc_gap], c="#B2182B", s=130, marker="*", zorder=5, label="ICC (case study)")
     xs = np.linspace(lmin.min(), lmin.max(), 50)
     ax1.plot(xs, a + slope * xs, "k-", lw=1.5, label=f"fit: R²={r2_1:.2f} [{r2_lo:.2f},{r2_hi:.2f}]")
     ax1.set_xlabel("log10(minority-class events)"); ax1.set_ylabel("optimism gap (cherry-pick − honest)")

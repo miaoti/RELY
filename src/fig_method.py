@@ -25,8 +25,8 @@ import figstyle as fs
 ROOT = Path(__file__).resolve().parents[1]
 FIGS, RESULTS = ROOT / "figures", ROOT / "results"
 
-TRAIN_H, TEST_H = "#cfe9dd", fs.C_HONEST      # honest arm: train / test
-TRAIN_S, TEST_S = "#fbdcc9", fs.C_CHERRY      # selection arm: train / test
+TRAIN_H, TEST_H = fs.BAND_H, fs.C_HONEST      # honest arm: train / test
+TRAIN_S, TEST_S = fs.BAND_C, fs.C_CHERRY      # selection arm: train / test
 
 
 def split_rows(ax, y0, n_rows, row_h, gap, test_frac, kind, train_c, test_c, rng):
@@ -91,9 +91,9 @@ def main():
 
     # ---------------- (b) what the selection arm actually produces ----------------
     y = rng.normal(0, 1, tuned.size)
-    axD.scatter(tuned, y, s=3.4, c=fs.C_CHERRY, alpha=0.30, linewidths=0, zorder=2)
+    axD.scatter(tuned, y, s=3.6, c=fs.C_CHERRY, alpha=0.38, linewidths=0, zorder=2)
     axD.axvline(mean_a, color="0.25", lw=1.3, zorder=4)
-    axD.axvline(max_a, color="#b0410d", lw=1.6, zorder=4)
+    axD.axvline(max_a, color=fs.RED, lw=1.6, zorder=4)
     axD.axvline(honest, color=fs.C_HONEST, lw=1.3, ls=(0, (3, 2)), zorder=4)
 
     ymax = 3.6
@@ -107,20 +107,20 @@ def main():
     # Delta bracket, drawn only on this one distribution
     yb = ymax * 0.98
     axD.add_patch(FancyArrowPatch((mean_a, yb), (max_a, yb), arrowstyle="<|-|>",
-                                  mutation_scale=7, color="#b0410d", lw=1.3, zorder=6))
+                                  mutation_scale=7, color=fs.RED, lw=1.3, zorder=6))
     axD.text((mean_a + max_a) / 2, yb + 0.42,
-             r"$\Delta=%.2f$" % delta, fontsize=7.4, color="#b0410d",
+             r"$\Delta=%.2f$" % delta, fontsize=7.4, color=fs.RED,
              fontweight="bold", ha="center", va="bottom", zorder=6)
 
     axD.text(mean_a - 0.006, -ymax * 0.92, "mean\n%.2f" % mean_a, fontsize=5.9, color="0.25",
              ha="right", va="bottom", linespacing=1.15)
-    axD.text(max_a + 0.006, -ymax * 0.92, "max\n%.2f" % max_a, fontsize=5.9, color="#b0410d",
+    axD.text(max_a + 0.006, -ymax * 0.92, "max\n%.2f" % max_a, fontsize=5.9, color=fs.RED,
              ha="left", va="bottom", linespacing=1.15, fontweight="bold")
     axD.text(honest - 0.007, ymax * 1.05, "honest arm\n%.2f" % honest, fontsize=5.9,
              color=fs.C_HONEST, ha="right", va="center", linespacing=1.15)
 
     axD.text(0.0, 1.115, "WHAT SHOPPING BUYS", fontsize=6.8, fontweight="bold",
-             color="#b0410d", ha="left", va="center", transform=axD.transAxes)
+             color=fs.RED, ha="left", va="center", transform=axD.transAxes)
     axD.text(0.0, -0.30, r"$\Delta$ is taken inside the selection arm: the two arms are never subtracted",
              fontsize=5.6, color="0.30", ha="left", va="center", transform=axD.transAxes)
 

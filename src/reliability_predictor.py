@@ -296,24 +296,29 @@ def main():
                 edgecolor="white", linewidth=0.3)
     lim = [min(pred.min(), delta_split.min()), max(pred.max(), delta_split.max())]
     ax1.plot(lim, lim, "--", color="0.2", lw=1.1, label="identity")
-    # 验证图用的是"以诚实 AUC 为工作点"的仿射拟合，轴标签必须写明这一点：
-    # 计算器用的是另一套（零截距、null 工作点），两者不能互换。
-    ax1.set_xlabel(r"predicted  $\hat\alpha+\hat{\kappa}\,\mathrm{SE}_{\mathrm{AUC}}$  at honest working point"
-                   "\n" r"($\hat\alpha$=%+.3f, $\hat{\kappa}$=%.2f)" % (intercept, kappa_fit))
+    # 验证图用的是"以诚实 AUC 为工作点"的仿射拟合，计算器用的是另一套（零截距、null 工作点），
+    # 两者不能互换。这一点必须写在图里，但轴标签只留公式本身：旧版把
+    # "at honest working point ($\hat\alpha$=..., $\hat\kappa$=...)" 整串塞进 xlabel，
+    # 在跨栏图的半幅面板里横向溢出，工作点与系数改到左上角的注记里交代。
+    ax1.set_xlabel(r"predicted  $\hat\alpha+\hat{\kappa}\,\mathrm{SE}_{\mathrm{AUC}}$")
     ax1.set_ylabel(r"observed $\Delta_{\mathrm{split}}$")
     ax1.set_title("(a) Predicted vs. observed")
     # cluster CI 属于【样本内】R^2，不是 held-out-source R^2 的区间；两者必须分行写清，
     # 否则并排放置会让读者以为后者是前者的置信区间（第 5 轮外审就这么读的）。
-    ax1.annotate("$n$=%d cohorts\n"
+    ax1.annotate("$n$=%d cohorts;  SE at each cohort's honest AUC\n"
+                 r"  ($\hat\alpha$=%+.3f, $\hat{\kappa}$=%.2f)" "\n"
                  "in-sample $R^2$ = %.2f  [%.2f, %.2f]\n"
                  "  (cluster bootstrap over sources)\n"
                  "held-out-source $R^2$ = %.2f"
-                 % (len(d), R2_se, np.percentile(boot, 2.5), np.percentile(boot, 97.5), oof_se),
+                 % (len(d), intercept, kappa_fit, R2_se, np.percentile(boot, 2.5),
+                    np.percentile(boot, 97.5), oof_se),
                  xy=(0.04, 0.97), xycoords="axes fraction", va="top", ha="left", fontsize=6.5)
     ax1.legend(loc="lower right")
     bars = ["HM SE", "free\nmulti", "log\nevents", "log\n$n$", "log\ndim"]
     vals = [R2_se, R2_multi, R2_ev, R2_n, R2_d]
-    cols = [figstyle.GREEN, figstyle.BLUE, figstyle.BLUE, figstyle.BLUE, figstyle.GREY]
+    # 一个量、一条信息：四个"靠类别计数"的预测量同一个蓝，维度单独用灰。
+    # （旧版单给 HM SE 上绿色，而绿在别处专指"诚实评测"，在这里串味。）
+    cols = [figstyle.BLUE] * 4 + [figstyle.GREY]
     ax2.bar(range(len(bars)), vals, color=cols, width=0.72)
     ax2.set_xticks(range(len(bars))); ax2.set_xticklabels(bars)
     for i, v in enumerate(vals):
